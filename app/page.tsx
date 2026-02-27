@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { addToWaitlist, getWaitlistCount, trackPageView } from "@/lib/supabase";
 
 // ─── ICONSAX SVG ICONS (inline, no package needed) ────────────────────────────
 // Using iconsax.io icon style: Linear/outline — clean, professional
@@ -344,7 +345,7 @@ function Navbar() {
 }
 
 // ─── HERO ──────────────────────────────────────────────────────────────────────
-function Hero() {
+function Hero({ waitlistCount }: { waitlistCount: number }) {
   return (
     <section className="min-h-screen flex flex-col justify-center pt-16 px-6">
       <div className="max-w-6xl mx-auto w-full">
@@ -389,7 +390,7 @@ function Hero() {
                   ))}
                 </div>
                 <p className="text-xs text-black/45 mt-0.5">
-                  2,000+ creators on waitlist
+                  {waitlistCount.toLocaleString()}+ creators on waitlist
                 </p>
               </div>
             </div>
@@ -960,10 +961,21 @@ function Contact() {
     }
     setError("");
     setLoading(true);
-    // For now — store in localStorage and show success
-    // Will be replaced with Supabase insert when keys are added
+
     try {
-      await new Promise((res) => setTimeout(res, 800)); // simulate API
+      const { error: supabaseError } = await addToWaitlist({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        role: role || "Not specified",
+      });
+
+      if (supabaseError) {
+        setError(
+          supabaseError.message || "Something went wrong. Please try again."
+        );
+        return;
+      }
+
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -1254,11 +1266,22 @@ function Footer() {
 
 // ─── PAGE ──────────────────────────────────────────────────────────────────────
 export default function Home() {
+  const [waitlistCount, setWaitlistCount] = useState<number>(2000);
+
+  useEffect(() => {
+    // Track page view
+    trackPageView("/");
+    // Get real waitlist count
+    getWaitlistCount().then(({ count }) => {
+      if (count > 0) setWaitlistCount(count);
+    });
+  }, []);
+
   return (
     <>
       <Navbar />
       <main>
-        <Hero />
+        <Hero waitlistCount={waitlistCount} />
         <Problem />
         <About />
         <HowItWorks />
