@@ -236,6 +236,27 @@ const Icon = {
       <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
     </svg>
   ),
+  Instagram: () => (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+    </svg>
+  ),
+  Threads: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 12.3c-.1-2.85-1.87-4.44-4.73-4.44-.02 0-.04 0-.06 0-1.37.01-2.5.5-3.3 1.43-.67.77-1.01 1.78-1.01 2.97 0 2.56 1.6 4.1 4.27 4.1 1.47 0 2.63-.46 3.43-1.38l-1.2-.9c-.52.58-1.27.87-2.23.87-1.6 0-2.56-.87-2.72-2.44h7.5c.03-.24.05-.47.05-.21zm-7.5-.6c.17-1.37 1.03-2.18 2.4-2.18 1.35 0 2.17.8 2.34 2.18H12.09zm-4.6 5.7c.82 0 1.56-.18 2.22-.54l-.7-1.1c-.44.25-.96.38-1.52.38-1.38 0-2.08-.75-2.08-2.25V8.1H7.5V7H5.41V4.5H3.74V7H2.5v1.1h1.24v5.9c0 2.27 1.18 3.4 3.75 3.4z" />
+    </svg>
+  ),
 };
 
 // ─── NAVBAR ────────────────────────────────────────────────────────────────────
@@ -327,16 +348,16 @@ function Hero() {
   return (
     <section className="min-h-screen flex flex-col justify-center pt-16 px-6">
       <div className="max-w-6xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center py-12 md:py-16">
           {/* Left — Copy */}
           <div>
             {/* Status badge */}
-            <div className="inline-flex items-center gap-2 border border-black/12 bg-white/60 px-4 py-2 rounded-full text-xs text-black/60 mb-8">
+            <div className="inline-flex items-center gap-2 border border-black/12 bg-white/60 px-4 py-1.5 rounded-full text-xs text-black/60 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
               Early Access — Limited Spots Available
             </div>
 
-            <h1 className="font-display text-5xl md:text-6xl lg:text-[64px] text-black leading-[1.05] tracking-tight mb-6">
+            <h1 className="font-display text-4xl md:text-5xl lg:text-[60px] text-black leading-[1.05] tracking-tight mb-5">
               Your work
               <br />
               deserves to
@@ -344,48 +365,49 @@ function Hero() {
               be <span className="italic">seen.</span>
             </h1>
 
-            <p className="text-black/55 text-lg leading-relaxed mb-10 max-w-md">
+            <p className="text-black/55 text-base md:text-lg leading-relaxed mb-6 max-w-md">
               Rachnax is the platform where creators, students, and
               professionals showcase projects, build portfolios, get recognized
               — and get hired.
             </p>
 
             {/* Social proof */}
-            <div className="flex items-center gap-3 mb-10">
+            <div className="flex items-center gap-3 mb-7">
               <div className="flex -space-x-2">
                 {["#7B2FE0", "#3B82F6", "#10B981", "#F59E0B"].map((c, i) => (
                   <div
                     key={i}
-                    className="w-8 h-8 rounded-full border-2 border-[#e8e9e8]"
+                    className="w-7 h-7 rounded-full border-2 border-[#e8e9e8]"
                     style={{ background: c }}
                   />
                 ))}
               </div>
               <div>
-                <div className="flex items-center gap-1 text-amber-500">
+                <div className="flex items-center gap-0.5 text-amber-500">
                   {[...Array(5)].map((_, i) => (
                     <Icon.Star key={i} />
                   ))}
                 </div>
                 <p className="text-xs text-black/45 mt-0.5">
-                  Trusted by 2,000+ creators on waitlist
+                  2,000+ creators on waitlist
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            {/* Buttons — always same row on all screen sizes */}
+            <div className="flex flex-row gap-2.5">
               <Link
                 href="#contact"
-                className="inline-flex items-center gap-2 bg-black text-white px-7 py-3.5 rounded-full text-sm font-medium hover:bg-black/85 transition-colors"
+                className="inline-flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-black/85 transition-colors whitespace-nowrap"
               >
-                Join the Waitlist
+                Join Waitlist
                 <Icon.ArrowRight />
               </Link>
               <Link
                 href="#how-it-works"
-                className="inline-flex items-center gap-2 border border-black/15 text-black px-7 py-3.5 rounded-full text-sm font-medium hover:border-black/30 hover:bg-black/4 transition-all"
+                className="inline-flex items-center gap-2 border border-black/15 text-black px-5 py-3 rounded-full text-sm font-medium hover:border-black/30 hover:bg-black/4 transition-all whitespace-nowrap"
               >
-                See How It Works
+                How It Works
               </Link>
             </div>
           </div>
@@ -539,7 +561,7 @@ function Problem() {
   ];
 
   return (
-    <section className="py-24 px-6 bg-black">
+    <section className="py-14 md:py-20 px-6 bg-black">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
@@ -599,7 +621,7 @@ function About() {
   ];
 
   return (
-    <section id="about" className="py-24 px-6">
+    <section id="about" className="py-14 md:py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div>
@@ -730,7 +752,7 @@ function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="py-24 px-6 bg-black/[0.02] border-y border-black/6"
+      className="py-14 md:py-20 px-6 bg-black/[0.02] border-y border-black/6"
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
@@ -816,7 +838,7 @@ function Services() {
   ];
 
   return (
-    <section id="services" className="py-24 px-6">
+    <section id="services" className="py-14 md:py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14">
           <div>
@@ -928,7 +950,7 @@ function Contact() {
   const [email, setEmail] = useState("");
 
   return (
-    <section id="contact" className="py-24 px-6">
+    <section id="contact" className="py-14 md:py-20 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left */}
@@ -946,7 +968,7 @@ function Contact() {
               first creators to showcase their work on our platform.
             </p>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               {[
                 {
                   icon: <Icon.Flash />,
@@ -976,6 +998,27 @@ function Contact() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Social links */}
+            <div className="mt-8 pt-8 border-t border-black/8 flex items-center gap-4">
+              <a
+                href="https://instagram.com/rachnaxofficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-black/50 hover:text-black transition-colors"
+              >
+                <Icon.Instagram /> @rachnaxofficial
+              </a>
+              <span className="text-black/15">·</span>
+              <a
+                href="https://www.threads.net/@rachnaxofficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-black/50 hover:text-black transition-colors"
+              >
+                <Icon.Threads /> Threads
+              </a>
             </div>
           </div>
 
@@ -1037,7 +1080,7 @@ function Contact() {
               </div>
 
               <a
-                href={`mailto:hello@rachnax.com?subject=Waitlist: ${encodeURIComponent(
+                href={`mailto:admin@rachnax.com?subject=Waitlist: ${encodeURIComponent(
                   name
                 )}&body=Name: ${encodeURIComponent(
                   name
@@ -1051,12 +1094,12 @@ function Contact() {
               </a>
 
               <p className="text-white/25 text-xs text-center">
-                Or email us directly at{" "}
+                Or email us at{" "}
                 <a
-                  href="mailto:hello@rachnax.com"
+                  href="mailto:admin@rachnax.com"
                   className="underline hover:text-white/50 transition-colors"
                 >
-                  hello@rachnax.com
+                  admin@rachnax.com
                 </a>
               </p>
             </div>
@@ -1091,16 +1134,26 @@ function Footer() {
 
         <div className="flex items-center gap-6 text-sm text-black/45">
           <a
-            href="mailto:hello@rachnax.com"
+            href="mailto:admin@rachnax.com"
             className="hover:text-black transition-colors flex items-center gap-1.5 text-xs"
           >
-            <Icon.Mail /> hello@rachnax.com
+            <Icon.Mail /> admin@rachnax.com
           </a>
-          <a href="#" className="hover:text-black transition-colors text-xs">
-            Twitter
+          <a
+            href="https://instagram.com/rachnaxofficial"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-black transition-colors text-xs"
+          >
+            Instagram
           </a>
-          <a href="#" className="hover:text-black transition-colors text-xs">
-            LinkedIn
+          <a
+            href="https://www.threads.net/@rachnaxofficial"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-black transition-colors text-xs"
+          >
+            Threads
           </a>
         </div>
       </div>
