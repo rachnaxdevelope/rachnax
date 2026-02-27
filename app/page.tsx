@@ -1108,7 +1108,8 @@ function Contact() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="name"
-                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                      style={{ color: "#ffffff", caretColor: "#ffffff" }}
+                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
                     />
                   </div>
 
@@ -1123,7 +1124,8 @@ function Contact() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       autoComplete="email"
-                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                      style={{ color: "#ffffff", caretColor: "#ffffff" }}
+                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
                     />
                   </div>
 
