@@ -948,6 +948,29 @@ function Contact() {
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) {
+      setError("Please fill in your name and email.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    // For now — store in localStorage and show success
+    // Will be replaced with Supabase insert when keys are added
+    try {
+      await new Promise((res) => setTimeout(res, 800)); // simulate API
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section id="contact" className="py-14 md:py-20 px-6">
@@ -1024,85 +1047,153 @@ function Contact() {
 
           {/* Right — Form */}
           <div className="bg-black rounded-3xl p-8">
-            <h3 className="font-display text-2xl text-white mb-1">
-              Join the Waitlist
-            </h3>
-            <p className="text-white/40 text-sm mb-8">
-              No spam. Only launch updates.
-            </p>
-
-            <div className="space-y-4">
-              {/* Name */}
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
-                  <Icon.User />
+            {submitted ? (
+              // Success state
+              <div className="flex flex-col items-center justify-center text-center py-10 gap-4">
+                <div className="w-14 h-14 rounded-full bg-green-500/15 flex items-center justify-center text-green-400">
+                  <Icon.Check />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white/6 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/25 transition-colors"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
-                  <Icon.Mail />
+                <div>
+                  <h3 className="font-display text-2xl text-white mb-2">
+                    You&apos;re on the list!
+                  </h3>
+                  <p className="text-white/45 text-sm leading-relaxed">
+                    We&apos;ll reach out to{" "}
+                    <span className="text-white/70">{email}</span> when we
+                    launch.
+                  </p>
                 </div>
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/6 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/25 transition-colors"
-                />
-              </div>
-
-              {/* Role */}
-              <div className="grid grid-cols-2 gap-2">
-                {["Student", "Professional", "Freelancer", "Creator"].map(
-                  (r) => (
-                    <button
-                      key={r}
-                      onClick={() => setRole(r)}
-                      className={`py-2.5 px-4 rounded-xl text-sm border transition-all ${
-                        role === r
-                          ? "bg-white text-black border-white"
-                          : "bg-white/5 text-white/50 border-white/10 hover:border-white/20 hover:text-white/70"
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  )
-                )}
-              </div>
-
-              <a
-                href={`mailto:admin@rachnax.com?subject=Waitlist: ${encodeURIComponent(
-                  name
-                )}&body=Name: ${encodeURIComponent(
-                  name
-                )}%0AEmail: ${encodeURIComponent(
-                  email
-                )}%0ARole: ${encodeURIComponent(role)}`}
-                className="flex items-center justify-center gap-2 w-full bg-white text-black py-4 rounded-xl text-sm font-medium hover:bg-white/90 transition-colors mt-2"
-              >
-                Reserve My Spot
-                <Icon.ArrowRight />
-              </a>
-
-              <p className="text-white/25 text-xs text-center">
-                Or email us at{" "}
-                <a
-                  href="mailto:admin@rachnax.com"
-                  className="underline hover:text-white/50 transition-colors"
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setName("");
+                    setEmail("");
+                    setRole("");
+                  }}
+                  className="mt-2 text-xs text-white/30 hover:text-white/60 transition-colors underline"
                 >
-                  admin@rachnax.com
-                </a>
-              </p>
-            </div>
+                  Submit another response
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-display text-2xl text-white mb-1">
+                  Join the Waitlist
+                </h3>
+                <p className="text-white/40 text-sm mb-7">
+                  No spam. Only launch updates.
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                  {/* Name */}
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+                      <Icon.User />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="name"
+                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+                      <Icon.Mail />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                      className="w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                    />
+                  </div>
+
+                  {/* Role selector */}
+                  <div>
+                    <p className="text-white/30 text-xs mb-2.5 ml-1">
+                      I am a...
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Student", "Professional", "Freelancer", "Creator"].map(
+                        (r) => (
+                          <button
+                            type="button"
+                            key={r}
+                            onClick={() => setRole(r)}
+                            className={`py-2.5 px-4 rounded-xl text-sm border transition-all ${
+                              role === r
+                                ? "bg-white text-black border-white font-medium"
+                                : "bg-white/5 text-white/50 border-white/10 hover:border-white/25 hover:text-white/75"
+                            }`}
+                          >
+                            {r}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Error message */}
+                  {error && (
+                    <p className="text-red-400 text-xs px-1">{error}</p>
+                  )}
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex items-center justify-center gap-2 w-full bg-white text-black py-3.5 rounded-xl text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <svg
+                          className="animate-spin w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : (
+                      <>
+                        Reserve My Spot
+                        <Icon.ArrowRight />
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-white/20 text-xs text-center">
+                    Questions?{" "}
+                    <a
+                      href="mailto:admin@rachnax.com"
+                      className="underline hover:text-white/45 transition-colors"
+                    >
+                      admin@rachnax.com
+                    </a>
+                  </p>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </div>
