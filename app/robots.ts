@@ -3,93 +3,127 @@ import { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      // Allow all standard search engines
+      // ── All crawlers — default rule ────────────────────────
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/"],
+        allow: ["/", "/explore"],
+        disallow: [
+          "/api/",
+          "/admin/",
+          "/_next/",
+          "/login",
+          "/signup",
+          "/*.json$",
+          "/private/",
+        ],
       },
-      // Google
+
+      // ── Major search engines ───────────────────────────────
       {
         userAgent: "Googlebot",
         allow: "/",
+        disallow: ["/api/", "/admin/", "/login", "/signup"],
       },
-      // Bing
       {
         userAgent: "Bingbot",
         allow: "/",
+        disallow: ["/api/", "/admin/", "/login", "/signup"],
       },
-      // ChatGPT / OpenAI
-      {
-        userAgent: "GPTBot",
-        allow: "/",
-      },
-      // ChatGPT browsing plugin
-      {
-        userAgent: "ChatGPT-User",
-        allow: "/",
-      },
-      // OpenAI other crawlers
-      {
-        userAgent: "OAI-SearchBot",
-        allow: "/",
-      },
-      // Claude / Anthropic
-      {
-        userAgent: "ClaudeBot",
-        allow: "/",
-      },
-      {
-        userAgent: "anthropic-ai",
-        allow: "/",
-      },
-      {
-        userAgent: "Claude-Web",
-        allow: "/",
-      },
-      // Perplexity AI
-      {
-        userAgent: "PerplexityBot",
-        allow: "/",
-      },
-      // Google Gemini / Bard
-      {
-        userAgent: "Google-Extended",
-        allow: "/",
-      },
-      // Meta AI (Llama)
-      {
-        userAgent: "meta-externalagent",
-        allow: "/",
-      },
-      {
-        userAgent: "FacebookBot",
-        allow: "/",
-      },
-      // Microsoft Copilot
-      {
-        userAgent: "msnbot",
-        allow: "/",
-      },
-      // Apple
       {
         userAgent: "Applebot",
         allow: "/",
       },
-      // Common AI research crawlers
+      {
+        userAgent: "DuckDuckBot",
+        allow: "/",
+      },
+
+      // ── AI assistants & LLM crawlers ──────────────────────
+      {
+        userAgent: "GPTBot",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "ChatGPT-User",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "OAI-SearchBot",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "ClaudeBot",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "anthropic-ai",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "Claude-Web",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "PerplexityBot",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "Google-Extended",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "meta-externalagent",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "FacebookBot",
+        allow: ["/", "/explore"],
+      },
+      {
+        userAgent: "msnbot",
+        allow: "/",
+      },
       {
         userAgent: "cohere-ai",
-        allow: "/",
+        allow: ["/", "/explore"],
       },
       {
         userAgent: "YouBot",
-        allow: "/",
+        allow: ["/", "/explore"],
       },
       {
         userAgent: "AI2Bot",
-        allow: "/",
+        allow: ["/", "/explore"],
+      },
+
+      // ── Block aggressive SEO / data scrapers ──────────────
+      // These crawlers waste crawl budget without adding value
+      {
+        userAgent: "AhrefsBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "SemrushBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "MJ12bot",
+        disallow: "/",
+      },
+      {
+        userAgent: "DotBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "BLEXBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "PetalBot",
+        disallow: "/",
       },
     ],
+
     sitemap: "https://www.rachnax.com/sitemap.xml",
     host: "https://www.rachnax.com",
   };

@@ -1,30 +1,35 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
+
+const BASE_URL = "https://www.rachnax.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
+    // ── Core pages ────────────────────────────────────────────
     {
-      url: 'https://www.rachnax.com',
+      url: BASE_URL,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
+      changeFrequency: "weekly",
+      priority: 1.0,
     },
     {
-      url: 'https://www.rachnax.com/#about',
+      url: `${BASE_URL}/explore`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      changeFrequency: "daily", // creator content updates frequently
+      priority: 0.9,
     },
-    {
-      url: 'https://www.rachnax.com/#services',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://www.rachnax.com/#contact',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
+
+    // ── Future pages (uncomment as they go live) ──────────────
+    // {
+    //   url: `${BASE_URL}/login`,
+    //   lastModified: new Date(),
+    //   changeFrequency: "yearly",
+    //   priority: 0.3,
+    // },
+    // {
+    //   url: `${BASE_URL}/signup`,
+    //   lastModified: new Date(),
+    //   changeFrequency: "yearly",
+    //   priority: 0.4,
+    // },
   ];
 }
