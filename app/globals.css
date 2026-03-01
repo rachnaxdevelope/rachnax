@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root {
   --background: #e8e9e8;
   --foreground: #0a0a0a;
@@ -23,7 +24,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ───────────────────────────────────────── */
+/* ── Scroll offset for fixed navbar ──────────────────────────── */
+
+section[id] {
+  scroll-margin-top: 72px;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
 
 ::-webkit-scrollbar {
   width: 5px;
@@ -38,7 +45,7 @@ body {
   border-radius: 9999px;
 }
 
-/* ── Navbar blur ─────────────────────────────────────── */
+/* ── Navbar blur ─────────────────────────────────────────────── */
 
 .nav-blur {
   background: rgba(232, 233, 232, 0.88);
@@ -47,7 +54,7 @@ body {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* ── Ticker scroll ───────────────────────────────────── */
+/* ── Ticker scroll ───────────────────────────────────────────── */
 
 @keyframes ticker {
   from {
@@ -62,24 +69,59 @@ body {
   animation: ticker 30s linear infinite;
 }
 
-/* ── Subtle page load fade ───────────────────────────── */
+/* ── Keyframes ───────────────────────────────────────────────── */
 
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translate3d(0, 24px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-main > section:first-child {
-  animation: fadeUp 0.6s ease forwards;
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-/* ── Focus styles (accessibility) ───────────────────── */
+@keyframes softPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.6);
+  }
+}
+
+/* ── Hero entry animations ───────────────────────────────────── */
+
+.hero-anim {
+  opacity: 0;
+  animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Continuous animations ───────────────────────────────────── */
+
+.animate-float {
+  animation: float 5s ease-in-out 1s infinite;
+}
+
+.pulse-dot {
+  animation: softPulse 2.5s ease-in-out infinite;
+}
+
+/* ── Focus styles (accessibility) ───────────────────────────── */
 
 :focus-visible {
   outline: 2px solid #0a0a0a;
@@ -87,54 +129,63 @@ main > section:first-child {
   border-radius: 4px;
 }
 
-/* ── Selection ───────────────────────────────────────── */
+/* ── Selection ───────────────────────────────────────────────── */
 
 ::selection {
   background: #0a0a0a;
   color: #e8e9e8;
 }
 
-/* ── Smooth transitions on interactive elements ──────── */
+/* ── Smooth transitions on interactive elements ──────────────── */
 
 a,
 button {
-  transition-property: color, background-color, border-color, opacity, transform,
-    box-shadow;
+  transition-property: color, background-color, border-color, opacity,
+    transform, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
 
-/* ── Remove tap highlight on mobile ─────────────────── */
+/* ── Remove tap highlight on mobile ─────────────────────────── */
 
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Fix browser autofill background on dark inputs ─── */
+/* ── Form inputs — force white text on dark backgrounds ─────── */
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
+.form-input {
+  color: #ffffff !important;
+  caret-color: #ffffff;
   -webkit-text-fill-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.08) inset !important;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.35) !important;
+  opacity: 1;
+}
+
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
   transition: background-color 5000s ease-in-out 0s;
   caret-color: #ffffff;
 }
 
-/* ── Dark form inputs — force white text ─────────────── */
+/* ── Reduced motion ──────────────────────────────────────────── */
 
-.dark-input {
-  color: #ffffff !important;
-  caret-color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
-.dark-input::placeholder {
-  color: rgba(255, 255, 255, 0.3) !important;
-  -webkit-text-fill-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.dark-input:focus {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

@@ -2,11 +2,73 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { addToWaitlist, getWaitlistCount, trackPageView } from "@/lib/supabase";
 
+// ─── ANIMATION UTILITIES ────────────────────────────────────────────────────
+
+function useInView(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.unobserve(el);
+        }
+      },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+
+  return [ref, inView] as const;
+}
+
+function fs(
+  inView: boolean,
+  delay = 0,
+  dir: "up" | "left" | "right" | "none" = "up"
+): React.CSSProperties {
+  return {
+    opacity: inView ? 1 : 0,
+    transform: inView
+      ? "translate3d(0,0,0)"
+      : dir === "left"
+      ? "translate3d(-28px,0,0)"
+      : dir === "right"
+      ? "translate3d(28px,0,0)"
+      : dir === "up"
+      ? "translate3d(0,28px,0)"
+      : "translate3d(0,0,0)",
+    transition: `opacity 0.65s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.65s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+    willChange: "opacity, transform",
+  };
+}
+
+function useCountUp(target: number, duration = 1400) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (target <= 0) return;
+    let id: number;
+    const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min((t - t0) / duration, 1);
+      setCount(Math.round((1 - Math.pow(1 - p, 3)) * target));
+      if (p < 1) id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(id);
+  }, [target, duration]);
+  return count;
+}
+
 // ─── ICONSAX SVG ICONS (inline, no package needed) ────────────────────────────
-// Using iconsax.io icon style: Linear/outline — clean, professional
 
 const Icon = {
   Portfolio: () => (
@@ -261,12 +323,24 @@ const Icon = {
 };
 
 // ─── NAVBAR ────────────────────────────────────────────────────────────────────
+
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 nav-blur">
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 nav-blur transition-shadow duration-300 ${
+          scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.07)]" : ""
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
@@ -302,7 +376,7 @@ function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="#contact"
-              className="hidden md:flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-black/85 transition-colors"
+              className="hidden md:flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-black/85 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               Join Waitlist
               <Icon.ArrowUpRight />
@@ -345,7 +419,10 @@ function Navbar() {
 }
 
 // ─── HERO ──────────────────────────────────────────────────────────────────────
+
 function Hero({ waitlistCount }: { waitlistCount: number }) {
+  const displayCount = useCountUp(waitlistCount, 1400);
+
   return (
     <section className="min-h-screen flex flex-col justify-center pt-16 px-6">
       <div className="max-w-6xl mx-auto w-full">
@@ -353,12 +430,18 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
           {/* Left — Copy */}
           <div>
             {/* Status badge */}
-            <div className="inline-flex items-center gap-2 border border-black/12 bg-white/60 px-4 py-1.5 rounded-full text-xs text-black/60 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <div
+              className="hero-anim inline-flex items-center gap-2 border border-black/12 bg-white/60 px-4 py-1.5 rounded-full text-xs text-black/60 mb-6"
+              style={{ animationDelay: "0ms" }}
+            >
+              <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
               Early Access — Limited Spots Available
             </div>
 
-            <h1 className="font-display text-4xl md:text-5xl lg:text-[60px] text-black leading-[1.05] tracking-tight mb-5">
+            <h1
+              className="hero-anim font-display text-4xl md:text-5xl lg:text-[60px] text-black leading-[1.05] tracking-tight mb-5"
+              style={{ animationDelay: "110ms" }}
+            >
               Your work
               <br />
               deserves to
@@ -366,14 +449,20 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
               be <span className="italic">seen.</span>
             </h1>
 
-            <p className="text-black/55 text-base md:text-lg leading-relaxed mb-6 max-w-md">
+            <p
+              className="hero-anim text-black/55 text-base md:text-lg leading-relaxed mb-6 max-w-md"
+              style={{ animationDelay: "210ms" }}
+            >
               Rachnax is the platform where creators, students, and
               professionals showcase projects, build portfolios, get recognized
               — and get hired.
             </p>
 
             {/* Social proof */}
-            <div className="flex items-center gap-3 mb-7">
+            <div
+              className="hero-anim flex items-center gap-3 mb-7"
+              style={{ animationDelay: "310ms" }}
+            >
               <div className="flex -space-x-2">
                 {["#7B2FE0", "#3B82F6", "#10B981", "#F59E0B"].map((c, i) => (
                   <div
@@ -390,23 +479,26 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
                   ))}
                 </div>
                 <p className="text-xs text-black/45 mt-0.5">
-                  {waitlistCount.toLocaleString()}+ creators on waitlist
+                  {displayCount.toLocaleString()}+ creators on waitlist
                 </p>
               </div>
             </div>
 
-            {/* Buttons — always same row on all screen sizes */}
-            <div className="flex flex-row gap-2.5">
+            {/* Buttons */}
+            <div
+              className="hero-anim flex flex-row gap-2.5"
+              style={{ animationDelay: "410ms" }}
+            >
               <Link
                 href="#contact"
-                className="inline-flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-black/85 transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-black/85 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 Join Waitlist
                 <Icon.ArrowRight />
               </Link>
               <Link
                 href="#how-it-works"
-                className="inline-flex items-center gap-2 border border-black/15 text-black px-5 py-3 rounded-full text-sm font-medium hover:border-black/30 hover:bg-black/4 transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-2 border border-black/15 text-black px-5 py-3 rounded-full text-sm font-medium hover:border-black/30 hover:bg-black/5 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 How It Works
               </Link>
@@ -414,119 +506,124 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
           </div>
 
           {/* Right — UI mockup */}
-          <div className="relative">
-            {/* Main profile card */}
-            <div className="bg-white rounded-2xl border border-black/8 shadow-sm overflow-hidden">
-              {/* Card header */}
-              <div className="bg-black px-6 pt-8 pb-12 relative overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 80% 20%, #7B2FE0 0%, transparent 60%)",
-                  }}
-                />
-                <div className="relative flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-lg font-bold">
-                      A
+          <div
+            className="hero-anim relative"
+            style={{ animationDelay: "200ms" }}
+          >
+            <div className="animate-float">
+              {/* Main profile card */}
+              <div className="bg-white rounded-2xl border border-black/8 shadow-sm overflow-hidden">
+                {/* Card header */}
+                <div className="bg-black px-6 pt-8 pb-12 relative overflow-hidden">
+                  <div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(circle at 80% 20%, #7B2FE0 0%, transparent 60%)",
+                    }}
+                  />
+                  <div className="relative flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-lg font-bold">
+                        A
+                      </div>
+                      <div>
+                        <p className="text-white font-medium text-sm">
+                          Aryan Mehta
+                        </p>
+                        <p className="text-white/50 text-xs">
+                          Product Designer · Student
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white font-medium text-sm">
-                        Aryan Mehta
-                      </p>
-                      <p className="text-white/50 text-xs">
-                        Product Designer · Student
-                      </p>
-                    </div>
+                    <span className="text-xs bg-green-500/20 text-green-400 border border-green-500/20 px-3 py-1 rounded-full">
+                      Open to work
+                    </span>
                   </div>
-                  <span className="text-xs bg-green-500/20 text-green-400 border border-green-500/20 px-3 py-1 rounded-full">
-                    Open to work
-                  </span>
+                </div>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 divide-x divide-black/6 -mt-6 mx-6 bg-white rounded-xl border border-black/8 shadow-sm relative z-10">
+                  {[
+                    { label: "Projects", value: "24" },
+                    { label: "Views", value: "18.4K" },
+                    { label: "Offers", value: "7" },
+                  ].map((s, i) => (
+                    <div key={i} className="py-4 text-center">
+                      <p className="font-display text-2xl text-black">
+                        {s.value}
+                      </p>
+                      <p className="text-xs text-black/40 mt-0.5">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Projects list */}
+                <div className="px-6 py-5 space-y-3">
+                  <p className="text-xs text-black/35 uppercase tracking-widest font-medium">
+                    Featured Projects
+                  </p>
+                  {[
+                    {
+                      name: "FinTech Dashboard UI",
+                      tag: "Design",
+                      views: "4.2K",
+                      color: "#7B2FE0",
+                    },
+                    {
+                      name: "AI Study Assistant App",
+                      tag: "Dev + Design",
+                      views: "6.8K",
+                      color: "#3B82F6",
+                    },
+                    {
+                      name: "Open Source UI Kit",
+                      tag: "Design System",
+                      views: "7.4K",
+                      color: "#10B981",
+                    },
+                  ].map((p, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-3 border-b border-black/5 last:border-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg flex-shrink-0"
+                          style={{ background: p.color + "18" }}
+                        >
+                          <div
+                            className="w-full h-full rounded-lg flex items-center justify-center"
+                            style={{ color: p.color }}
+                          >
+                            <Icon.Portfolio />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-black">
+                            {p.name}
+                          </p>
+                          <p className="text-xs text-black/40">{p.tag}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-black/35 text-xs">
+                        <Icon.Eye />
+                        {p.views}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Stats row */}
-              <div className="grid grid-cols-3 divide-x divide-black/6 -mt-6 mx-6 bg-white rounded-xl border border-black/8 shadow-sm relative z-10">
-                {[
-                  { label: "Projects", value: "24" },
-                  { label: "Views", value: "18.4K" },
-                  { label: "Offers", value: "7" },
-                ].map((s, i) => (
-                  <div key={i} className="py-4 text-center">
-                    <p className="font-display text-2xl text-black">
-                      {s.value}
-                    </p>
-                    <p className="text-xs text-black/40 mt-0.5">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Projects list */}
-              <div className="px-6 py-5 space-y-3">
-                <p className="text-xs text-black/35 uppercase tracking-widest font-medium">
-                  Featured Projects
-                </p>
-                {[
-                  {
-                    name: "FinTech Dashboard UI",
-                    tag: "Design",
-                    views: "4.2K",
-                    color: "#7B2FE0",
-                  },
-                  {
-                    name: "AI Study Assistant App",
-                    tag: "Dev + Design",
-                    views: "6.8K",
-                    color: "#3B82F6",
-                  },
-                  {
-                    name: "Open Source UI Kit",
-                    tag: "Design System",
-                    views: "7.4K",
-                    color: "#10B981",
-                  },
-                ].map((p, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between py-3 border-b border-black/5 last:border-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-lg flex-shrink-0"
-                        style={{ background: p.color + "18" }}
-                      >
-                        <div
-                          className="w-full h-full rounded-lg flex items-center justify-center"
-                          style={{ color: p.color }}
-                        >
-                          <Icon.Portfolio />
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-black">
-                          {p.name}
-                        </p>
-                        <p className="text-xs text-black/40">{p.tag}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-black/35 text-xs">
-                      <Icon.Eye />
-                      {p.views}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Floating notification */}
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl border border-black/8 shadow-lg px-4 py-3 flex items-center gap-3 max-w-[220px]">
-              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
-                <Icon.Briefcase />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-black">New job offer</p>
-                <p className="text-xs text-black/45">Stripe · Full-time</p>
+              {/* Floating notification */}
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl border border-black/8 shadow-lg px-4 py-3 flex items-center gap-3 max-w-[220px]">
+                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+                  <Icon.Briefcase />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-black">New job offer</p>
+                  <p className="text-xs text-black/45">Stripe · Full-time</p>
+                </div>
               </div>
             </div>
           </div>
@@ -537,7 +634,11 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
 }
 
 // ─── PROBLEM ───────────────────────────────────────────────────────────────────
+
 function Problem() {
+  const [textRef, textInView] = useInView(0.15);
+  const [gridRef, gridInView] = useInView(0.1);
+
   const problems = [
     {
       icon: <Icon.Portfolio />,
@@ -565,7 +666,7 @@ function Problem() {
     <section className="py-14 md:py-20 px-6 bg-black">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
+          <div ref={textRef} style={fs(textInView, 0, "left")}>
             <p className="text-white/30 text-xs tracking-widest uppercase font-medium mb-5">
               The Problem
             </p>
@@ -582,13 +683,17 @@ function Problem() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div
+            ref={gridRef}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
             {problems.map((p, i) => (
               <div
                 key={i}
-                className="border border-white/8 rounded-2xl p-6 hover:border-white/16 transition-colors group"
+                style={fs(gridInView, i * 80, "up")}
+                className="border border-white/8 rounded-2xl p-6 hover:border-white/20 hover:bg-white/[0.03] transition-all duration-300 group cursor-default"
               >
-                <div className="text-white/40 mb-4 group-hover:text-white/70 transition-colors">
+                <div className="text-white/40 mb-4 group-hover:text-white/70 transition-colors duration-300">
                   {p.icon}
                 </div>
                 <h3 className="text-white text-sm font-medium mb-2">
@@ -603,7 +708,9 @@ function Problem() {
         </div>
 
         <div className="mt-20 pt-20 border-t border-white/8 text-center">
-          <p className="font-display text-3xl md:text-4xl text-white/70">
+          <p
+            className="font-display text-3xl md:text-4xl text-white/70"
+          >
             Rachnax is the answer.
           </p>
         </div>
@@ -613,7 +720,11 @@ function Problem() {
 }
 
 // ─── ABOUT ─────────────────────────────────────────────────────────────────────
+
 function About() {
+  const [textRef, textInView] = useInView(0.15);
+  const [gridRef, gridInView] = useInView(0.1);
+
   const values = [
     "Meritocracy over credentials",
     "Work speaks louder than resumes",
@@ -625,7 +736,7 @@ function About() {
     <section id="about" className="py-14 md:py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div>
+          <div ref={textRef} style={fs(textInView, 0, "left")}>
             <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
               About Rachnax
             </p>
@@ -649,7 +760,11 @@ function About() {
 
             <div className="space-y-3">
               {values.map((v, i) => (
-                <div key={i} className="flex items-center gap-3">
+                <div
+                  key={i}
+                  style={fs(textInView, 200 + i * 80, "up")}
+                  className="flex items-center gap-3"
+                >
                   <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center flex-shrink-0 text-white">
                     <Icon.Check />
                   </div>
@@ -660,7 +775,7 @@ function About() {
           </div>
 
           {/* Right — Numbers */}
-          <div className="grid grid-cols-2 gap-4">
+          <div ref={gridRef} className="grid grid-cols-2 gap-4">
             {[
               {
                 number: "1",
@@ -685,10 +800,11 @@ function About() {
             ].map((s, i) => (
               <div
                 key={i}
-                className={`rounded-2xl p-7 border ${
+                style={fs(gridInView, i * 90, "up")}
+                className={`rounded-2xl p-7 border transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
                   i === 0
                     ? "bg-black border-transparent text-white"
-                    : "bg-white border-black/8 text-black"
+                    : "bg-white border-black/8 text-black hover:border-black/15"
                 }`}
               >
                 <p
@@ -722,7 +838,11 @@ function About() {
 }
 
 // ─── HOW IT WORKS ──────────────────────────────────────────────────────────────
+
 function HowItWorks() {
+  const [titleRef, titleInView] = useInView(0.2);
+  const [gridRef, gridInView] = useInView(0.08);
+
   const steps = [
     {
       num: "01",
@@ -756,7 +876,7 @@ function HowItWorks() {
       className="py-14 md:py-20 px-6 bg-black/[0.02] border-y border-black/6"
     >
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+        <div ref={titleRef} className="text-center mb-16" style={fs(titleInView, 0, "up")}>
           <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
             How It Works
           </p>
@@ -765,16 +885,20 @@ function HowItWorks() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/8 rounded-2xl overflow-hidden border border-black/8">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/8 rounded-2xl overflow-hidden border border-black/8"
+        >
           {steps.map((step, i) => (
             <div
               key={i}
-              className="bg-[#e8e9e8] p-8 relative hover:bg-white transition-colors group"
+              style={fs(gridInView, i * 100, "up")}
+              className="bg-[#e8e9e8] p-8 relative hover:bg-white transition-colors duration-300 group"
             >
               <p className="font-display text-5xl text-black/6 absolute top-6 right-6">
                 {step.num}
               </p>
-              <div className="text-black/40 mb-5 group-hover:text-black/70 transition-colors">
+              <div className="text-black/40 mb-5 group-hover:text-black/70 transition-colors duration-300">
                 {step.icon}
               </div>
               <h3 className="font-display text-lg text-black mb-3">
@@ -792,7 +916,11 @@ function HowItWorks() {
 }
 
 // ─── SERVICES ──────────────────────────────────────────────────────────────────
+
 function Services() {
+  const [titleRef, titleInView] = useInView(0.2);
+  const [gridRef, gridInView] = useInView(0.06);
+
   const services = [
     {
       icon: <Icon.Portfolio />,
@@ -841,7 +969,11 @@ function Services() {
   return (
     <section id="services" className="py-14 md:py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14">
+        <div
+          ref={titleRef}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14"
+          style={fs(titleInView, 0, "up")}
+        >
           <div>
             <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
               What We Offer
@@ -858,13 +990,17 @@ function Services() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {services.map((s, i) => (
             <div
               key={i}
-              className={`rounded-2xl p-7 border flex flex-col gap-5 group transition-all hover:-translate-y-0.5 hover:shadow-md ${
+              style={fs(gridInView, i * 70, "up")}
+              className={`rounded-2xl p-7 border flex flex-col gap-5 group transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                 s.featured
-                  ? "bg-black border-transparent"
+                  ? "bg-black border-transparent hover:shadow-black/20"
                   : "bg-white border-black/8 hover:border-black/15"
               }`}
             >
@@ -873,7 +1009,7 @@ function Services() {
                   s.featured ? "text-white/60" : "text-black/40"
                 } group-hover:${
                   s.featured ? "text-white/90" : "text-black/70"
-                } transition-colors`}
+                } transition-colors duration-300`}
               >
                 {s.icon}
               </div>
@@ -913,6 +1049,7 @@ function Services() {
 }
 
 // ─── TICKER ────────────────────────────────────────────────────────────────────
+
 function Ticker() {
   const tags = [
     "Portfolio",
@@ -945,6 +1082,7 @@ function Ticker() {
 }
 
 // ─── CONTACT ───────────────────────────────────────────────────────────────────
+
 function Contact() {
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
@@ -952,6 +1090,9 @@ function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [leftRef, leftInView] = useInView(0.1);
+  const [rightRef, rightInView] = useInView(0.1);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -989,7 +1130,7 @@ function Contact() {
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left */}
-          <div className="lg:pt-4">
+          <div ref={leftRef} className="lg:pt-4" style={fs(leftInView, 0, "left")}>
             <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
               Get Early Access
             </p>
@@ -1021,7 +1162,11 @@ function Contact() {
                   desc: "Direct line to our team during onboarding.",
                 },
               ].map((b, i) => (
-                <div key={i} className="flex items-start gap-4">
+                <div
+                  key={i}
+                  style={fs(leftInView, 150 + i * 90, "up")}
+                  className="flex items-start gap-4"
+                >
                   <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center flex-shrink-0 text-black/50">
                     {b.icon}
                   </div>
@@ -1036,7 +1181,10 @@ function Contact() {
             </div>
 
             {/* Social links */}
-            <div className="mt-8 pt-8 border-t border-black/8 flex items-center gap-4">
+            <div
+              style={fs(leftInView, 450, "up")}
+              className="mt-8 pt-8 border-t border-black/8 flex items-center gap-4"
+            >
               <a
                 href="https://instagram.com/rachnaxofficial"
                 target="_blank"
@@ -1058,164 +1206,156 @@ function Contact() {
           </div>
 
           {/* Right — Form */}
-          <div className="bg-black rounded-3xl p-8">
-            {submitted ? (
-              // Success state
-              <div className="flex flex-col items-center justify-center text-center py-10 gap-4">
-                <div className="w-14 h-14 rounded-full bg-green-500/15 flex items-center justify-center text-green-400">
-                  <Icon.Check />
-                </div>
-                <div>
-                  <h3 className="font-display text-2xl text-white mb-2">
-                    You&apos;re on the list!
-                  </h3>
-                  <p className="text-white/45 text-sm leading-relaxed">
-                    We&apos;ll reach out to{" "}
-                    <span className="text-white/70">{email}</span> when we
-                    launch.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setName("");
-                    setEmail("");
-                    setRole("");
-                  }}
-                  className="mt-2 text-xs text-white/30 hover:text-white/60 transition-colors underline"
-                >
-                  Submit another response
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="font-display text-2xl text-white mb-1">
-                  Join the Waitlist
-                </h3>
-                <p className="text-white/40 text-sm mb-7">
-                  No spam. Only launch updates.
-                </p>
-
-                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                  {/* Name */}
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
-                      <Icon.User />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="name"
-                      style={{
-                        color: "#ffffff",
-                        caretColor: "#ffffff",
-                        WebkitTextFillColor: "#ffffff",
-                      }}
-                      className="dark-input w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
-                    />
+          <div ref={rightRef} style={fs(rightInView, 100, "right")}>
+            <div className="bg-black rounded-3xl p-8">
+              {submitted ? (
+                // Success state
+                <div className="flex flex-col items-center justify-center text-center py-10 gap-4">
+                  <div className="w-14 h-14 rounded-full bg-green-500/15 flex items-center justify-center text-green-400">
+                    <Icon.Check />
                   </div>
-
-                  {/* Email */}
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
-                      <Icon.Mail />
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      style={{
-                        color: "#ffffff",
-                        caretColor: "#ffffff",
-                        WebkitTextFillColor: "#ffffff",
-                      }}
-                      className="dark-input w-full bg-white/8 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
-                    />
-                  </div>
-
-                  {/* Role selector */}
                   <div>
-                    <p className="text-white/30 text-xs mb-2.5 ml-1">
-                      I am a...
+                    <h3 className="font-display text-2xl text-white mb-2">
+                      You&apos;re on the list!
+                    </h3>
+                    <p className="text-white/45 text-sm leading-relaxed">
+                      We&apos;ll reach out to{" "}
+                      <span className="text-white/70">{email}</span> when we
+                      launch.
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {["Student", "Professional", "Freelancer", "Creator"].map(
-                        (r) => (
-                          <button
-                            type="button"
-                            key={r}
-                            onClick={() => setRole(r)}
-                            className={`py-2.5 px-4 rounded-xl text-sm border transition-all ${
-                              role === r
-                                ? "bg-white text-black border-white font-medium"
-                                : "bg-white/5 text-white/50 border-white/10 hover:border-white/25 hover:text-white/75"
-                            }`}
-                          >
-                            {r}
-                          </button>
-                        )
-                      )}
-                    </div>
                   </div>
-
-                  {/* Error message */}
-                  {error && (
-                    <p className="text-red-400 text-xs px-1">{error}</p>
-                  )}
-
-                  {/* Submit */}
                   <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex items-center justify-center gap-2 w-full bg-white text-black py-3.5 rounded-xl text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+                    onClick={() => {
+                      setSubmitted(false);
+                      setName("");
+                      setEmail("");
+                      setRole("");
+                    }}
+                    className="mt-2 text-xs text-white/30 hover:text-white/60 transition-colors underline"
                   >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <svg
-                          className="animate-spin w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8z"
-                          />
-                        </svg>
-                        Submitting...
-                      </span>
-                    ) : (
-                      <>
-                        Reserve My Spot
-                        <Icon.ArrowRight />
-                      </>
-                    )}
+                    Submit another response
                   </button>
-
-                  <p className="text-white/20 text-xs text-center">
-                    Questions?{" "}
-                    <a
-                      href="mailto:admin@rachnax.com"
-                      className="underline hover:text-white/45 transition-colors"
-                    >
-                      admin@rachnax.com
-                    </a>
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-display text-2xl text-white mb-1">
+                    Join the Waitlist
+                  </h3>
+                  <p className="text-white/40 text-sm mb-7">
+                    No spam. Only launch updates.
                   </p>
-                </form>
-              </>
-            )}
+
+                  <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                    {/* Name */}
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+                        <Icon.User />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        autoComplete="name"
+                        className="form-input w-full bg-white/[0.08] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-white/30 focus:bg-white/[0.12] transition-all"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+                        <Icon.Mail />
+                      </div>
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
+                        className="form-input w-full bg-white/[0.08] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-white/30 focus:bg-white/[0.12] transition-all"
+                      />
+                    </div>
+
+                    {/* Role selector */}
+                    <div>
+                      <p className="text-white/30 text-xs mb-2.5 ml-1">
+                        I am a...
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Student", "Professional", "Freelancer", "Creator"].map(
+                          (r) => (
+                            <button
+                              type="button"
+                              key={r}
+                              onClick={() => setRole(r)}
+                              className={`py-2.5 px-4 rounded-xl text-sm border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                                role === r
+                                  ? "bg-white text-black border-white font-medium"
+                                  : "bg-white/5 text-white/50 border-white/10 hover:border-white/25 hover:text-white/75"
+                              }`}
+                            >
+                              {r}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Error message */}
+                    {error && (
+                      <p className="text-red-400 text-xs px-1">{error}</p>
+                    )}
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex items-center justify-center gap-2 w-full bg-white text-black py-3.5 rounded-xl text-sm font-medium hover:bg-white/90 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <svg
+                            className="animate-spin w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8z"
+                            />
+                          </svg>
+                          Submitting...
+                        </span>
+                      ) : (
+                        <>
+                          Reserve My Spot
+                          <Icon.ArrowRight />
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-white/20 text-xs text-center">
+                      Questions?{" "}
+                      <a
+                        href="mailto:admin@rachnax.com"
+                        className="underline hover:text-white/45 transition-colors"
+                      >
+                        admin@rachnax.com
+                      </a>
+                    </p>
+                  </form>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1224,9 +1364,12 @@ function Contact() {
 }
 
 // ─── FOOTER ────────────────────────────────────────────────────────────────────
+
 function Footer() {
+  const [ref, inView] = useInView(0.2);
+
   return (
-    <footer className="border-t border-black/8 px-6 py-10">
+    <footer ref={ref} style={fs(inView, 0, "up")} className="border-t border-black/8 px-6 py-10">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 relative">
@@ -1275,13 +1418,12 @@ function Footer() {
 }
 
 // ─── PAGE ──────────────────────────────────────────────────────────────────────
+
 export default function Home() {
   const [waitlistCount, setWaitlistCount] = useState<number>(2000);
 
   useEffect(() => {
-    // Track page view
     trackPageView("/");
-    // Get real waitlist count
     getWaitlistCount().then(({ count }) => {
       if (count > 0) setWaitlistCount(count);
     });
