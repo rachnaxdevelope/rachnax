@@ -25,10 +25,10 @@ function fs(inView: boolean, delay = 0, dir: "up" | "left" | "right" | "none" = 
   return {
     opacity: inView ? 1 : 0,
     transform: inView ? "translate3d(0,0,0)"
-      : dir === "left" ? "translate3d(-32px,0,0)"
-      : dir === "right" ? "translate3d(32px,0,0)"
-      : "translate3d(0,28px,0)",
-    transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+      : dir === "left" ? "translate3d(-20px,0,0)"
+      : dir === "right" ? "translate3d(20px,0,0)"
+      : "translate3d(0,20px,0)",
+    transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
     willChange: "opacity, transform",
   };
 }
@@ -522,7 +522,7 @@ function NomineesSection({ category }: { category: string }) {
             const scoreStyle = getScoreStyle(p.score);
             return (
               <div key={p.id} style={fs(inView, 60 + i * 80, "up")}>
-                <div className="bg-white rounded-2xl border border-black/[0.07] overflow-hidden cursor-pointer group transition-all duration-400 hover:shadow-2xl hover:-translate-y-1.5 hover:border-black/[0.12]">
+                <div className="bg-white rounded-2xl border border-black/[0.07] overflow-hidden cursor-pointer group transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-2xl hover:-translate-y-1.5 hover:border-black/[0.12]">
 
                   {/* Image — zooms on hover, overlay appears */}
                   <div className="relative overflow-hidden" style={{ height: "clamp(200px, 22vw, 300px)" }}>
@@ -632,7 +632,7 @@ function SpotlightSection() {
             return (
               <div key={i} style={fs(inView, 60 + i * 60, "up")}>
                 <div
-                  className="group flex items-center gap-5 p-5 bg-white rounded-2xl border border-black/[0.07] hover:border-black/[0.14] hover:shadow-xl cursor-pointer transition-all duration-350 relative overflow-hidden"
+                  className="group flex items-center gap-5 p-5 bg-white rounded-2xl border border-black/[0.07] hover:border-black/[0.14] hover:shadow-xl cursor-pointer transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden"
                 >
                   {/* Rank */}
                   <span className="font-display text-4xl text-black/[0.07] w-11 flex-shrink-0 select-none group-hover:text-black/[0.12] transition-colors">
@@ -719,7 +719,7 @@ function RisingSection() {
                 style={{ ...fs(inView, 80 + i * 70, "up"), ...(isFeatured ? { gridColumn: "span 2", gridRow: "span 2" } : {}) }}
               >
                 <div
-                  className={`relative overflow-hidden cursor-pointer group rounded-2xl p-7 flex flex-col justify-between transition-all duration-400 hover:-translate-y-1 hover:scale-[1.01] h-full`}
+                  className={`relative overflow-hidden cursor-pointer group rounded-2xl p-7 flex flex-col justify-between transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:scale-[1.01] h-full`}
                   style={{ background: `linear-gradient(${c.gradient})` }}
                 >
                   {/* Radial accent glow */}
@@ -796,7 +796,7 @@ function SubmitCTA() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Dark — Submit */}
           <div style={fs(inView, 80, "left")}>
-            <div className="bg-[#0c0c0f] rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-350">
+            <div className="bg-[#0c0c0f] rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               <div>
                 <div className="w-10 h-10 rounded-full border border-white/[0.12] flex items-center justify-center mb-8">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round"><path d="M7 17L17 7M7 7h10v10" /></svg>
@@ -813,7 +813,7 @@ function SubmitCTA() {
 
           {/* Purple — Early Access */}
           <div style={fs(inView, 160, "right")}>
-            <div className="rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-350 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 50%, #3730A3 100%)" }}>
+            <div className="rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden" style={{ background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 50%, #3730A3 100%)" }}>
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_35%,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center mb-8">

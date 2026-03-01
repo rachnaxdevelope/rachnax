@@ -40,13 +40,13 @@ function fs(
     transform: inView
       ? "translate3d(0,0,0)"
       : dir === "left"
-      ? "translate3d(-28px,0,0)"
+      ? "translate3d(-20px,0,0)"
       : dir === "right"
-      ? "translate3d(28px,0,0)"
+      ? "translate3d(20px,0,0)"
       : dir === "up"
-      ? "translate3d(0,28px,0)"
+      ? "translate3d(0,20px,0)"
       : "translate3d(0,0,0)",
-    transition: `opacity 0.65s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.65s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+    transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
     willChange: "opacity, transform",
   };
 }
@@ -691,7 +691,7 @@ function Problem() {
               <div
                 key={i}
                 style={fs(gridInView, i * 80, "up")}
-                className="border border-white/8 rounded-2xl p-6 hover:border-white/20 hover:bg-white/[0.03] transition-all duration-300 group cursor-default"
+                className="border border-white/8 rounded-2xl p-6 hover:border-white/20 hover:bg-white/[0.03] transition-[border-color,background-color,color] duration-300 ease-out group cursor-default"
               >
                 <div className="text-white/40 mb-4 group-hover:text-white/70 transition-colors duration-300">
                   {p.icon}
@@ -801,7 +801,7 @@ function About() {
               <div
                 key={i}
                 style={fs(gridInView, i * 90, "up")}
-                className={`rounded-2xl p-7 border transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
+                className={`rounded-2xl p-7 border transition-[transform,box-shadow,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-md ${
                   i === 0
                     ? "bg-black border-transparent text-white"
                     : "bg-white border-black/8 text-black hover:border-black/15"
@@ -998,7 +998,7 @@ function Services() {
             <div
               key={i}
               style={fs(gridInView, i * 70, "up")}
-              className={`rounded-2xl p-7 border flex flex-col gap-5 group transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+              className={`rounded-2xl p-7 border flex flex-col gap-5 group transition-[transform,box-shadow,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-lg ${
                 s.featured
                   ? "bg-black border-transparent hover:shadow-black/20"
                   : "bg-white border-black/8 hover:border-black/15"
@@ -1127,7 +1127,7 @@ function Contact() {
 
   return (
     <section id="contact" className="py-14 md:py-20 px-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left */}
           <div ref={leftRef} className="lg:pt-4" style={fs(leftInView, 0, "left")}>

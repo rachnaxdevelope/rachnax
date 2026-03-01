@@ -15,6 +15,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 72px;
 }
 
 body {
@@ -108,7 +109,7 @@ section[id] {
 
 .hero-anim {
   opacity: 0;
-  animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ── Continuous animations ───────────────────────────────────── */
@@ -142,8 +143,8 @@ a,
 button {
   transition-property: color, background-color, border-color, opacity,
     transform, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Remove tap highlight on mobile ─────────────────────────── */
