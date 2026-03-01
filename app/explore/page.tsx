@@ -45,65 +45,55 @@ function fs(
   };
 }
 
-// ─── TYPES ──────────────────────────────────────────────────────────────────
-
-type Breakdown = {
-  design: number;
-  usability: number;
-  creativity: number;
-  content: number;
-};
-
-type Creator = {
-  name: string;
-  initials: string;
-  role: string;
-};
+// ─── TYPES ───────────────────────────────────────────────────────────────────
 
 type Project = {
   id: number;
   title: string;
-  creator: Creator;
+  creator: { name: string; initials: string; role: string };
   category: string;
   score: number;
-  breakdown: Breakdown;
+  breakdown: { design: number; usability: number; creativity: number; content: number };
   gradient: string;
   accentColor: string;
   views: string;
   likes: number;
   tags: string[];
-  badge: "cotd" | "nominee" | null;
   time: string;
 };
 
-// ─── MOCK DATA ───────────────────────────────────────────────────────────────
+type CreatorProfile = {
+  initials: string;
+  name: string;
+  role: string;
+  score: number;
+  projects: number;
+  gradient: string;
+  accentColor: string;
+  topProject: string;
+  category: string;
+};
 
-const CATEGORIES = [
-  "All",
-  "Design",
-  "Development",
-  "Motion",
-  "Illustration",
-  "Branding",
-  "3D Art",
-];
+// ─── DATA ────────────────────────────────────────────────────────────────────
 
-const FEATURED: Project[] = [
-  {
-    id: 1,
-    title: "Nebula Finance Dashboard",
-    creator: { name: "Aryan Mehta", initials: "AM", role: "Product Designer" },
-    category: "Design",
-    score: 9.8,
-    breakdown: { design: 4.9, usability: 4.8, creativity: 5.0, content: 4.7 },
-    gradient: "135deg, #3b0764 0%, #7B2FE0 55%, #1e1b4b 100%",
-    accentColor: "#a78bfa",
-    views: "24.1K",
-    likes: 1847,
-    tags: ["Dashboard", "FinTech", "Dark UI"],
-    badge: "cotd",
-    time: "2 hours ago",
-  },
+const CATEGORIES = ["All", "Design", "Development", "Motion", "Illustration", "Branding", "3D Art"];
+
+const COTD: Project = {
+  id: 1,
+  title: "Nebula Finance Dashboard",
+  creator: { name: "Aryan Mehta", initials: "AM", role: "Product Designer" },
+  category: "Design",
+  score: 9.8,
+  breakdown: { design: 4.9, usability: 4.8, creativity: 5.0, content: 4.7 },
+  gradient: "135deg, #3b0764 0%, #7B2FE0 55%, #1e1b4b 100%",
+  accentColor: "#a78bfa",
+  views: "24.1K",
+  likes: 1847,
+  tags: ["Dashboard", "FinTech", "Dark UI"],
+  time: "2 hours ago",
+};
+
+const NOMINEES: Project[] = [
   {
     id: 2,
     title: "Rhythm — Music Visualizer",
@@ -116,13 +106,12 @@ const FEATURED: Project[] = [
     views: "18.6K",
     likes: 1243,
     tags: ["Motion", "Music", "WebGL"],
-    badge: "nominee",
-    time: "5 hours ago",
+    time: "5h ago",
   },
   {
     id: 3,
-    title: "Horizon — 3D Portfolio World",
-    creator: { name: "Karan Nair", initials: "KN", role: "3D Artist & Developer" },
+    title: "Horizon — 3D Portfolio",
+    creator: { name: "Karan Nair", initials: "KN", role: "3D Artist" },
     category: "3D Art",
     score: 9.6,
     breakdown: { design: 4.9, usability: 4.7, creativity: 5.0, content: 4.8 },
@@ -131,12 +120,8 @@ const FEATURED: Project[] = [
     views: "31.2K",
     likes: 2891,
     tags: ["Three.js", "3D", "WebGL"],
-    badge: "nominee",
-    time: "8 hours ago",
+    time: "8h ago",
   },
-];
-
-const NOMINATIONS: Project[] = [
   {
     id: 4,
     title: "Bloom — Wellness App",
@@ -149,8 +134,7 @@ const NOMINATIONS: Project[] = [
     views: "12.4K",
     likes: 876,
     tags: ["Health", "Mobile", "Calm UI"],
-    badge: null,
-    time: "1 hour ago",
+    time: "1h ago",
   },
   {
     id: 5,
@@ -163,9 +147,8 @@ const NOMINATIONS: Project[] = [
     accentColor: "#fbbf24",
     views: "9.8K",
     likes: 654,
-    tags: ["Design System", "Branding", "Figma"],
-    badge: null,
-    time: "3 hours ago",
+    tags: ["Design System", "Figma"],
+    time: "3h ago",
   },
   {
     id: 6,
@@ -179,8 +162,7 @@ const NOMINATIONS: Project[] = [
     views: "15.7K",
     likes: 1102,
     tags: ["Portfolio", "Next.js", "GSAP"],
-    badge: null,
-    time: "6 hours ago",
+    time: "6h ago",
   },
   {
     id: 7,
@@ -194,8 +176,7 @@ const NOMINATIONS: Project[] = [
     views: "22.1K",
     likes: 1987,
     tags: ["Illustration", "Art", "Characters"],
-    badge: null,
-    time: "9 hours ago",
+    time: "9h ago",
   },
   {
     id: 8,
@@ -208,122 +189,58 @@ const NOMINATIONS: Project[] = [
     accentColor: "#4ade80",
     views: "8.3K",
     likes: 543,
-    tags: ["Travel", "App Design", "Maps"],
-    badge: null,
-    time: "12 hours ago",
+    tags: ["Travel", "App Design"],
+    time: "12h ago",
   },
 ];
 
-const RISING: Project[] = [
-  {
-    id: 9,
-    title: "Void — Dark OS Concept",
-    creator: { name: "Nisha Reddy", initials: "NR", role: "Interaction Designer" },
-    category: "Design",
-    score: 8.4,
-    breakdown: { design: 4.5, usability: 4.2, creativity: 4.6, content: 4.1 },
-    gradient: "135deg, #0f172a 0%, #334155 55%, #1e293b 100%",
-    accentColor: "#94a3b8",
-    views: "6.2K",
-    likes: 412,
-    tags: ["OS Design", "Dark", "Concept"],
-    badge: null,
-    time: "1 day ago",
-  },
-  {
-    id: 10,
-    title: "Wavelength — Audio App",
-    creator: { name: "Dev Sharma", initials: "DS", role: "Frontend Developer" },
-    category: "Development",
-    score: 8.6,
-    breakdown: { design: 4.4, usability: 4.5, creativity: 4.4, content: 4.3 },
-    gradient: "135deg, #2d1b69 0%, #5b21b6 55%, #3730a3 100%",
-    accentColor: "#a78bfa",
-    views: "7.1K",
-    likes: 489,
-    tags: ["Audio", "React", "Web API"],
-    badge: null,
-    time: "2 days ago",
-  },
-  {
-    id: 11,
-    title: "Gaia — Nature Brand Identity",
-    creator: { name: "Ria Kulkarni", initials: "RK", role: "Brand Designer" },
-    category: "Branding",
-    score: 8.5,
-    breakdown: { design: 4.5, usability: 4.2, creativity: 4.5, content: 4.3 },
-    gradient: "135deg, #1a3a1a 0%, #4d7c0f 55%, #3f6212 100%",
-    accentColor: "#86efac",
-    views: "5.4K",
-    likes: 367,
-    tags: ["Brand", "Nature", "Logo"],
-    badge: null,
-    time: "2 days ago",
-  },
+const CREATOR_PROFILES: CreatorProfile[] = [
+  { initials: "AM", name: "Aryan Mehta", role: "Product Designer", score: 9.8, projects: 12, gradient: "135deg, #3b0764, #7B2FE0", accentColor: "#a78bfa", topProject: "Nebula Finance", category: "Design" },
+  { initials: "KN", name: "Karan Nair", role: "3D Artist & Dev", score: 9.6, projects: 8, gradient: "135deg, #0c4a6e, #0284c7", accentColor: "#38bdf8", topProject: "Horizon 3D World", category: "3D Art" },
+  { initials: "RK", name: "Rohit Kumar", role: "Motion Designer", score: 9.4, projects: 6, gradient: "135deg, #831843, #e11d48", accentColor: "#fb7185", topProject: "Rhythm Visualizer", category: "Motion" },
+  { initials: "PS", name: "Priya Singh", role: "Illustrator", score: 9.3, projects: 15, gradient: "135deg, #500724, #db2777", accentColor: "#f472b6", topProject: "Aurora Pack", category: "Illustration" },
+  { initials: "SG", name: "Sneha Gupta", role: "Brand Designer", score: 9.1, projects: 9, gradient: "135deg, #78350f, #d97706", accentColor: "#fbbf24", topProject: "Prism System", category: "Branding" },
+  { initials: "VS", name: "Vikram Shah", role: "Full Stack Dev", score: 8.9, projects: 11, gradient: "135deg, #172554, #2563eb", accentColor: "#60a5fa", topProject: "Nexus Portfolio", category: "Development" },
 ];
 
-const LEADERBOARD = [
-  { rank: 1, name: "Karan Nair", role: "3D Artist", score: 9.6, projects: 8, initials: "KN", accentColor: "#38bdf8" },
-  { rank: 2, name: "Aryan Mehta", role: "Product Designer", score: 9.8, projects: 12, initials: "AM", accentColor: "#a78bfa" },
-  { rank: 3, name: "Priya Singh", role: "Illustrator", score: 9.3, projects: 15, initials: "PS", accentColor: "#f472b6" },
-  { rank: 4, name: "Sneha Gupta", role: "Brand Designer", score: 9.1, projects: 9, initials: "SG", accentColor: "#fbbf24" },
-  { rank: 5, name: "Rohit Kumar", role: "Motion Designer", score: 9.4, projects: 6, initials: "RK", accentColor: "#fb7185" },
+const RISING_CREATORS: CreatorProfile[] = [
+  { initials: "NR", name: "Nisha Reddy", role: "Interaction Designer", score: 8.4, projects: 3, gradient: "135deg, #0f172a, #334155", accentColor: "#94a3b8", topProject: "Void OS Concept", category: "Design" },
+  { initials: "DS", name: "Dev Sharma", role: "Frontend Dev", score: 8.6, projects: 4, gradient: "135deg, #2d1b69, #5b21b6", accentColor: "#a78bfa", topProject: "Wavelength Audio", category: "Development" },
+  { initials: "RK2", name: "Ria Kulkarni", role: "Brand Designer", score: 8.5, projects: 5, gradient: "135deg, #1a3a1a, #4d7c0f", accentColor: "#86efac", topProject: "Gaia Brand", category: "Branding" },
+  { initials: "AP2", name: "Anay Pillai", role: "Motion Artist", score: 8.3, projects: 2, gradient: "135deg, #1c1917, #78350f", accentColor: "#fdba74", topProject: "Parallax Shorts", category: "Motion" },
 ];
 
-// ─── HELPER ──────────────────────────────────────────────────────────────────
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function getScoreStyle(score: number) {
-  if (score >= 9.5) return { color: "#10B981", bg: "rgba(16,185,129,0.10)", border: "rgba(16,185,129,0.22)" };
-  if (score >= 9.0) return { color: "#22C55E", bg: "rgba(34,197,94,0.10)", border: "rgba(34,197,94,0.22)" };
-  if (score >= 8.5) return { color: "#EAB308", bg: "rgba(234,179,8,0.10)", border: "rgba(234,179,8,0.22)" };
-  return { color: "#F59E0B", bg: "rgba(245,158,11,0.10)", border: "rgba(245,158,11,0.22)" };
+  if (score >= 9.5) return { color: "#059669", bg: "#ecfdf5", border: "#a7f3d0", label: "Exceptional" };
+  if (score >= 9.0) return { color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0", label: "Excellent" };
+  if (score >= 8.5) return { color: "#d97706", bg: "#fffbeb", border: "#fde68a", label: "Great" };
+  return { color: "#ea580c", bg: "#fff7ed", border: "#fed7aa", label: "Good" };
 }
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+// ─── PROJECT PREVIEW ─────────────────────────────────────────────────────────
 
-function ProjectPreview({
-  gradient,
-  accentColor,
-  height = "h-52",
-}: {
-  gradient: string;
-  accentColor: string;
-  height?: string;
-}) {
+function ProjectPreview({ gradient, accentColor, height = "h-44" }: { gradient: string; accentColor: string; height?: string }) {
   return (
-    <div
-      className={`relative overflow-hidden rounded-xl ${height} w-full flex-shrink-0`}
-      style={{ background: `linear-gradient(${gradient})` }}
-    >
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(circle at 25% 35%, ${accentColor}30 0%, transparent 65%)`,
-        }}
-      />
-      {/* Simulated UI skeleton */}
-      <div className="absolute inset-3 bg-black/25 rounded-lg backdrop-blur-[2px] border border-white/[0.06] p-3 flex flex-col gap-2">
+    <div className={`relative overflow-hidden w-full ${height}`} style={{ background: `linear-gradient(${gradient})` }}>
+      <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 25% 30%, ${accentColor}35 0%, transparent 65%)` }} />
+      <div className="absolute inset-3 bg-black/20 rounded-xl border border-white/[0.07] p-3 flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <div className="h-1.5 w-16 rounded-full" style={{ background: `${accentColor}70` }} />
-          <div className="h-1.5 w-10 rounded-full bg-white/10" />
-          <div className="ml-auto h-4 w-4 rounded bg-white/10" />
+          <div className="h-1.5 w-16 rounded-full" style={{ background: `${accentColor}80` }} />
+          <div className="h-1.5 w-10 rounded-full bg-white/15" />
+          <div className="ml-auto h-3.5 w-3.5 rounded bg-white/10" />
         </div>
-        <div className="grid grid-cols-3 gap-1.5 mt-1">
+        <div className="grid grid-cols-3 gap-1.5">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-7 rounded-lg bg-white/[0.06] border border-white/[0.05]" />
+            <div key={i} className="h-7 rounded-lg bg-white/[0.07] border border-white/[0.05]" />
           ))}
         </div>
-        <div className="flex-1 space-y-1.5 mt-1">
+        <div className="flex-1 space-y-1.5">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded flex-shrink-0"
-                style={{ background: `${accentColor}35` }}
-              />
-              <div
-                className="h-1.5 rounded-full bg-white/10"
-                style={{ width: `${55 + i * 18}%` }}
-              />
+              <div className="w-3 h-3 rounded flex-shrink-0" style={{ background: `${accentColor}40` }} />
+              <div className="h-1.5 rounded-full bg-white/10" style={{ width: `${50 + i * 17}%` }} />
             </div>
           ))}
         </div>
@@ -332,23 +249,33 @@ function ProjectPreview({
   );
 }
 
-function ScoreBadge({ score, large = false }: { score: number; large?: boolean }) {
+// ─── SCORE BADGE ─────────────────────────────────────────────────────────────
+
+function ScoreBadge({ score, size = "md" }: { score: number; size?: "sm" | "md" | "lg" }) {
   const s = getScoreStyle(score);
+  const cls = { sm: "px-2 py-0.5 text-xs rounded-lg", md: "px-2.5 py-1 text-sm rounded-xl", lg: "px-3 py-1.5 text-base rounded-xl" };
   return (
-    <div
-      className={`rounded-xl font-display flex flex-col items-center justify-center flex-shrink-0 ${
-        large ? "w-16 h-16 text-xl" : "w-11 h-11 text-base"
-      }`}
-      style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
-    >
-      <span className="leading-none">{score.toFixed(1)}</span>
-      <span
-        className="leading-none mt-0.5"
-        style={{ fontSize: "9px", opacity: 0.6, fontFamily: "inherit" }}
-      >
-        /10
-      </span>
-    </div>
+    <span className={`font-display font-medium inline-block ${cls[size]}`} style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}>
+      {score.toFixed(1)}
+    </span>
+  );
+}
+
+// ─── ARROW SVG ───────────────────────────────────────────────────────────────
+
+function ArrowRight({ size = 13, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function ArrowUpRight({ size = 13, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round">
+      <path d="M7 17L17 7M7 7h10v10" />
+    </svg>
   );
 }
 
@@ -357,155 +284,90 @@ function ScoreBadge({ score, large = false }: { score: number; large?: boolean }
 function ExploreNav() {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10);
+    const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#09090f]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_24px_rgba(0,0,0,0.6)]"
-          : "bg-transparent"
-      }`}
-    >
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#fffefe]/95 backdrop-blur-xl border-b border-black/[0.06] shadow-[0_1px_12px_rgba(0,0,0,0.04)]" : "bg-transparent"}`}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Back + Logo */}
         <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-white/35 hover:text-white/70 transition-colors text-sm group"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              className="group-hover:-translate-x-0.5 transition-transform"
-            >
+          <Link href="/" className="flex items-center gap-1.5 text-black/35 hover:text-black/70 transition-colors text-sm group">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="group-hover:-translate-x-0.5 transition-transform">
               <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
             Back
           </Link>
-          <span className="text-white/10 text-lg">|</span>
-          <Link href="/" className="font-display text-white text-lg tracking-tight">
-            Rachnax
-          </Link>
-          <span className="hidden md:inline text-white/15 text-xs bg-white/5 border border-white/8 px-2 py-0.5 rounded-full">
-            Explore
-          </span>
+          <span className="text-black/10 text-lg">|</span>
+          <Link href="/" className="font-display text-black text-lg tracking-tight">Rachnax</Link>
+          <span className="hidden md:inline text-black/30 text-xs bg-black/[0.04] border border-black/[0.06] px-2.5 py-0.5 rounded-full">Explore</span>
         </div>
-
-        {/* Links */}
         <div className="hidden md:flex items-center gap-1">
-          {[
-            { label: "Nominees", href: "#nominees" },
-            { label: "Rising", href: "#rising" },
-            { label: "Leaderboard", href: "#leaderboard" },
-          ].map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="px-4 py-2 text-sm text-white/35 hover:text-white/80 rounded-lg hover:bg-white/5 transition-all duration-150"
-            >
+          {[{ label: "Nominees", href: "#nominees" }, { label: "Creators", href: "#creators" }, { label: "Rising", href: "#rising" }].map((l) => (
+            <a key={l.label} href={l.href} className="px-4 py-2 text-sm text-black/40 hover:text-black/80 rounded-xl hover:bg-black/[0.04] transition-all">
               {l.label}
             </a>
           ))}
         </div>
-
-        {/* CTA */}
-        <Link
-          href="/#contact"
-          className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
-        >
-          Submit Work
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          >
-            <path d="M7 17L17 7M7 7h10v10" />
-          </svg>
+        <Link href="/#contact" className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-black/80 hover:scale-[1.02] active:scale-[0.98] transition-all">
+          Submit Work <ArrowUpRight />
         </Link>
       </div>
     </nav>
   );
 }
 
-// ─── PAGE HERO ───────────────────────────────────────────────────────────────
+// ─── HERO — AWWWARDS editorial big type ──────────────────────────────────────
 
 function PageHero() {
   const [ref, inView] = useInView(0.1);
 
   return (
-    <section className="pt-36 pb-20 px-6 text-center relative overflow-hidden">
-      {/* Background glow */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(123,47,224,0.18) 0%, transparent 70%)",
-        }}
-      />
-
-      <div ref={ref} className="max-w-4xl mx-auto relative">
-        {/* Live pill */}
-        <div
-          style={fs(inView, 0)}
-          className="inline-flex items-center gap-2.5 bg-white/[0.04] border border-white/10 px-4 py-1.5 rounded-full text-xs text-white/40 mb-10"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          Live Showcase · Updated daily · March 2026
+    <section className="pt-32 pb-12 px-6 border-b border-black/[0.06]">
+      <div ref={ref} className="max-w-7xl mx-auto">
+        {/* Top bar */}
+        <div style={fs(inView, 0)} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+          <div className="flex items-center gap-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-black/35 text-xs tracking-widest uppercase font-medium">Live · March 2026</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-8">
+            {[{ label: "Projects", value: "2,847" }, { label: "Creators", value: "10.4K" }, { label: "Nominations", value: "847" }].map((s, i) => (
+              <div key={i} className="text-right">
+                <p className="font-display text-xl text-black leading-none">{s.value}</p>
+                <p className="text-black/30 text-xs mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <h1
-          style={fs(inView, 80)}
-          className="font-display text-6xl md:text-8xl text-white leading-[0.9] tracking-tight mb-7"
-        >
-          Where great work
-          <br />
-          <span
-            className="italic"
-            style={{
-              background: "linear-gradient(135deg, #a78bfa, #7B2FE0, #38bdf8)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            gets recognized.
-          </span>
-        </h1>
+        {/* AWWWARDS-style giant headline */}
+        <div style={fs(inView, 60)}>
+          <h1 className="font-display text-black leading-[0.88] tracking-tight mb-6" style={{ fontSize: "clamp(64px, 13vw, 180px)" }}>
+            DISCOVER<span style={{ color: "#7B2FE0" }}>.</span>
+          </h1>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <p className="text-black/45 text-lg md:text-xl max-w-lg leading-relaxed">
+              The finest creative work from India&apos;s best builders, designers, and developers — voted by the community.
+            </p>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <a href="#nominees" className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-black/80 hover:scale-[1.02] transition-all">
+                Explore Nominees <ArrowRight />
+              </a>
+              <Link href="/#contact" className="inline-flex items-center gap-2 border border-black/15 text-black px-6 py-3 rounded-full text-sm font-medium hover:bg-black/5 hover:border-black/30 transition-all">
+                Submit Work
+              </Link>
+            </div>
+          </div>
+        </div>
 
-        <p
-          style={fs(inView, 160)}
-          className="text-white/35 text-lg max-w-xl mx-auto leading-relaxed mb-14"
-        >
-          Every day, Rachnax surfaces the finest projects from students,
-          designers, and builders — voted by the community.
-        </p>
-
-        {/* Live stats */}
-        <div
-          style={fs(inView, 240)}
-          className="flex items-center justify-center gap-10 md:gap-16"
-        >
-          {[
-            { label: "Projects Submitted", value: "2,847" },
-            { label: "Creators", value: "10,451" },
-            { label: "Live Nominations", value: "847" },
-          ].map((s, i) => (
-            <div key={i} className="text-center">
-              <p className="font-display text-4xl text-white mb-1">{s.value}</p>
-              <p className="text-white/25 text-xs tracking-wide">{s.label}</p>
+        {/* Mobile stats */}
+        <div style={fs(inView, 120)} className="flex items-center gap-6 mt-8 sm:hidden">
+          {[{ label: "Projects", value: "2,847" }, { label: "Creators", value: "10.4K" }, { label: "Nominations", value: "847" }].map((s, i) => (
+            <div key={i}>
+              <p className="font-display text-2xl text-black">{s.value}</p>
+              <p className="text-black/30 text-xs">{s.label}</p>
             </div>
           ))}
         </div>
@@ -516,27 +378,13 @@ function PageHero() {
 
 // ─── CATEGORY TABS ───────────────────────────────────────────────────────────
 
-function CategoryTabs({
-  active,
-  setActive,
-}: {
-  active: string;
-  setActive: (c: string) => void;
-}) {
+function CategoryTabs({ active, setActive }: { active: string; setActive: (c: string) => void }) {
   return (
-    <div className="sticky top-16 z-40 bg-[#09090f]/90 backdrop-blur-xl border-b border-white/[0.05] px-6 py-3">
-      <div className="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
+    <div className="sticky top-16 z-40 bg-[#fffefe]/95 backdrop-blur-xl border-b border-black/[0.06] px-6 py-3">
+      <div className="max-w-7xl mx-auto overflow-x-auto">
         <div className="flex items-center gap-2 min-w-max">
           {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setActive(c)}
-              className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 ${
-                active === c
-                  ? "bg-white text-black font-medium shadow-sm"
-                  : "text-white/35 hover:text-white/65 hover:bg-white/[0.05]"
-              }`}
-            >
+            <button key={c} onClick={() => setActive(c)} className={`px-4 py-1.5 rounded-full text-sm transition-all duration-200 ${active === c ? "bg-black text-white font-medium" : "text-black/40 hover:text-black/70 hover:bg-black/[0.05]"}`}>
               {c}
             </button>
           ))}
@@ -546,249 +394,117 @@ function CategoryTabs({
   );
 }
 
-// ─── COTD CARD ───────────────────────────────────────────────────────────────
+// ─── COTD SECTION — Google Labs large featured card, dark for contrast ────────
 
-function COTDCard({ project }: { project: Project }) {
+function COTDSection() {
+  const [ref, inView] = useInView(0.05);
   const [hovered, setHovered] = useState(false);
+  const p = COTD;
+  const s = getScoreStyle(p.score);
 
   return (
-    <div
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden cursor-pointer h-full transition-all duration-500"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        boxShadow: hovered
-          ? `0 24px 64px ${project.accentColor}22, inset 0 0 0 1px ${project.accentColor}25`
-          : "none",
-      }}
-    >
-      {/* COTD badge row */}
-      <div className="px-6 pt-5 pb-4 flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-amber-400/[0.08] border border-amber-400/[0.18] px-3 py-1 rounded-full">
-          <span className="text-amber-400 text-xs">✦</span>
-          <span className="text-amber-400 text-xs font-medium tracking-wide">
-            Creator of the Day
-          </span>
-        </div>
-        <span className="text-white/20 text-xs ml-auto">{project.time}</span>
-      </div>
-
-      {/* Preview image */}
-      <div className="px-6">
-        <ProjectPreview
-          gradient={project.gradient}
-          accentColor={project.accentColor}
-          height="h-72"
-        />
-      </div>
-
-      {/* Info */}
-      <div className="p-6">
-        <div className="flex items-start justify-between gap-4 mb-5">
-          <div>
-            <h3 className="font-display text-2xl text-white mb-2 leading-tight">
-              {project.title}
-            </h3>
-            <div className="flex items-center gap-2.5">
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-                style={{
-                  background: `linear-gradient(135deg, ${project.accentColor}cc, ${project.accentColor}60)`,
-                }}
-              >
-                {project.creator.initials[0]}
-              </div>
-              <span className="text-white/50 text-sm">{project.creator.name}</span>
-              <span className="text-white/15">·</span>
-              <span className="text-white/30 text-sm">{project.creator.role}</span>
-            </div>
-          </div>
-          <ScoreBadge score={project.score} large />
-        </div>
-
-        {/* Score breakdown */}
-        <div className="grid grid-cols-4 gap-3 p-4 bg-white/[0.025] rounded-xl border border-white/[0.05] mb-5">
-          {Object.entries(project.breakdown).map(([key, val]) => (
-            <div key={key} className="text-center">
-              <p className="text-white/20 text-[10px] uppercase tracking-widest mb-1.5">
-                {key.slice(0, 4)}
-              </p>
-              <p className="text-white/75 text-sm font-medium mb-1.5">{val}</p>
-              <div className="h-0.5 rounded-full bg-white/[0.08]">
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: hovered ? `${(val / 5) * 100}%` : "0%",
-                    background: project.accentColor,
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tags + CTA row */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            {project.tags.map((t) => (
-              <span
-                key={t}
-                className="text-xs text-white/25 bg-white/[0.04] border border-white/[0.07] px-2.5 py-1 rounded-full"
-              >
-                {t}
-              </span>
-            ))}
-            <span className="text-white/20 text-xs">{project.views} views</span>
-            <span className="text-white/20 text-xs">
-              {project.likes.toLocaleString()} likes
-            </span>
-          </div>
-          <button className="flex-shrink-0 flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all">
-            View Project
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            >
-              <path d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── NOMINEE CARD (compact stack) ────────────────────────────────────────────
-
-function NomineeCard({ project }: { project: Project }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden cursor-pointer transition-all duration-300 group flex-1"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        boxShadow: hovered ? `0 8px 32px ${project.accentColor}18` : "none",
-        borderColor: hovered ? `${project.accentColor}30` : undefined,
-      }}
-    >
-      <ProjectPreview
-        gradient={project.gradient}
-        accentColor={project.accentColor}
-        height="h-36"
-      />
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <h4 className="text-white text-sm font-medium leading-tight mb-1 group-hover:text-white transition-colors">
-              {project.title}
-            </h4>
-            <p className="text-white/30 text-xs">{project.creator.name}</p>
-          </div>
-          <ScoreBadge score={project.score} />
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-white/20 text-xs">{project.views} views</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.04] text-white/25 border border-white/[0.06]">
-            {project.category}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── GRID CARD (nominations / rising) ────────────────────────────────────────
-
-function GridCard({ project }: { project: Project }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden cursor-pointer transition-all duration-300 group"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        boxShadow: hovered ? `0 8px 30px ${project.accentColor}15` : "none",
-        borderColor: hovered ? `${project.accentColor}28` : undefined,
-      }}
-    >
-      <ProjectPreview
-        gradient={project.gradient}
-        accentColor={project.accentColor}
-        height="h-44"
-      />
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <h4 className="text-white text-sm font-medium mb-1 group-hover:text-white transition-colors leading-tight">
-              {project.title}
-            </h4>
-            <p className="text-white/30 text-xs">
-              {project.creator.name} · {project.creator.role}
-            </p>
-          </div>
-          <ScoreBadge score={project.score} />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex gap-1.5">
-            {project.tags.slice(0, 2).map((t) => (
-              <span
-                key={t}
-                className="text-[10px] text-white/22 bg-white/[0.04] border border-white/[0.05] px-2 py-0.5 rounded-full"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-          <span className="text-white/20 text-xs">{project.views}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── FEATURED SECTION ────────────────────────────────────────────────────────
-
-function FeaturedSection({ category }: { category: string }) {
-  const [ref, inView] = useInView(0.04);
-
-  const pool = category === "All" ? FEATURED : FEATURED.filter((p) => p.category === category);
-  const cotd = pool[0] ?? FEATURED[0];
-  const nominees =
-    pool.length >= 3 ? pool.slice(1, 3) : [...FEATURED.slice(1, 3)];
-
-  return (
-    <section className="px-6 pb-20">
+    <section className="px-6 py-14">
       <div ref={ref} className="max-w-7xl mx-auto">
-        {/* Section header */}
-        <div
-          style={fs(inView, 0)}
-          className="flex items-center gap-4 mb-8"
-        >
-          <div className="flex items-center gap-2 bg-amber-400/[0.07] border border-amber-400/[0.14] px-3.5 py-1.5 rounded-full">
-            <span className="text-amber-400">✦</span>
-            <span className="text-amber-400 text-sm font-medium">Featured Today</span>
+        {/* Label */}
+        <div style={fs(inView, 0)} className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-full">
+            <span className="text-amber-500 text-sm">✦</span>
+            <span className="text-amber-600 text-xs font-medium tracking-wide uppercase">Creator of the Day</span>
           </div>
-          <div className="h-px flex-1 bg-white/[0.05]" />
-          <span className="text-white/20 text-xs">March 1, 2026</span>
+          <span className="text-black/25 text-xs">{p.time}</span>
         </div>
 
-        {/* Grid: COTD + Nominees */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
-          <div style={fs(inView, 80, "left")} className="lg:col-span-2">
-            <COTDCard project={cotd} />
+        {/* Dark featured card */}
+        <div
+          style={fs(inView, 60)}
+          className="rounded-3xl overflow-hidden bg-[#0a0a0a] grid grid-cols-1 lg:grid-cols-5 cursor-pointer"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          {/* Left — visual preview (3 cols) */}
+          <div className="lg:col-span-3 p-8">
+            <div className="w-full rounded-2xl overflow-hidden" style={{ height: "clamp(220px, 35vw, 400px)", background: `linear-gradient(${p.gradient})` }}>
+              <div className="w-full h-full relative">
+                <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 25% 30%, ${p.accentColor}30 0%, transparent 60%)` }} />
+                <div className="absolute inset-5 bg-black/25 rounded-xl border border-white/[0.07] p-5 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-20 rounded-full" style={{ background: `${p.accentColor}90` }} />
+                    <div className="h-2 w-12 rounded-full bg-white/15" />
+                    <div className="ml-auto flex gap-1.5">
+                      {[...Array(3)].map((_, i) => <div key={i} className="w-2 h-2 rounded-full bg-white/20" />)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 flex-1">
+                    <div className="col-span-2 bg-white/[0.06] rounded-xl border border-white/[0.05] p-3 flex flex-col gap-2">
+                      <div className="h-1.5 w-16 rounded-full" style={{ background: `${p.accentColor}60` }} />
+                      <div className="flex-1 grid grid-cols-8 gap-1 items-end pt-2">
+                        {[40, 65, 55, 80, 50, 75, 90, 60].map((h, i) => (
+                          <div key={i} className="rounded-t-sm transition-all duration-500" style={{ height: `${hovered ? h : h * 0.7}%`, background: i === 6 ? p.accentColor : `${p.accentColor}35` }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {["9.8", "18K", "7"].map((v, i) => (
+                        <div key={i} className="flex-1 bg-white/[0.06] rounded-xl border border-white/[0.05] flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="font-display text-lg text-white/60">{v}</div>
+                            <div className="text-white/25 text-[10px]">{["Score", "Views", "Offers"][i]}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={fs(inView, 160, "right")} className="flex flex-col gap-4">
-            {nominees.map((p) => (
-              <NomineeCard key={p.id} project={p} />
-            ))}
+
+          {/* Right — info (2 cols) */}
+          <div className="lg:col-span-2 p-8 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-white/25 text-sm">{p.category}</span>
+                <div className="font-display text-2xl px-4 py-2 rounded-xl" style={{ color: s.color, background: `${s.color}15`, border: `1px solid ${s.color}30` }}>
+                  {p.score.toFixed(1)}<span className="text-xs ml-1 opacity-60">/10</span>
+                </div>
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl text-white leading-tight mb-3">{p.title}</h2>
+              <div className="flex items-center gap-2.5 mb-6">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${p.accentColor}cc, ${p.accentColor}50)` }}>
+                  {p.creator.initials[0]}
+                </div>
+                <span className="text-white/50 text-sm">{p.creator.name}</span>
+                <span className="text-white/20">·</span>
+                <span className="text-white/30 text-sm">{p.creator.role}</span>
+              </div>
+
+              {/* Score breakdown */}
+              <div className="space-y-3 mb-6">
+                {Object.entries(p.breakdown).map(([key, val]) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="text-white/25 text-xs w-16 capitalize">{key}</span>
+                    <div className="flex-1 h-1 rounded-full bg-white/[0.07]">
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: hovered ? `${(val / 5) * 100}%` : "0%", background: p.accentColor }} />
+                    </div>
+                    <span className="text-white/40 text-xs w-5 text-right">{val}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                {p.tags.map((t) => (
+                  <span key={t} className="text-xs text-white/25 bg-white/[0.05] border border-white/[0.07] px-2.5 py-1 rounded-full">{t}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-white/20 text-xs">{p.views} views · {p.likes.toLocaleString()} likes</span>
+              <button className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white/90 hover:scale-[1.02] transition-all">
+                View Project <ArrowUpRight />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -796,53 +512,154 @@ function FeaturedSection({ category }: { category: string }) {
   );
 }
 
-// ─── NOMINATIONS SECTION ─────────────────────────────────────────────────────
+// ─── NOMINEES SECTION — AWWWARDS nominees grid ───────────────────────────────
 
-function NominationsSection({ category }: { category: string }) {
-  const [ref, inView] = useInView(0.06);
-
-  const pool =
-    category === "All"
-      ? NOMINATIONS
-      : NOMINATIONS.filter((p) => p.category === category);
-  const shown = pool.length > 0 ? pool : NOMINATIONS;
+function NomineesSection({ category }: { category: string }) {
+  const [ref, inView] = useInView(0.05);
+  const filtered = category === "All" ? NOMINEES : NOMINEES.filter((p) => p.category === category);
+  const shown = filtered.length > 0 ? filtered : NOMINEES;
 
   return (
     <section id="nominees" className="px-6 pb-20">
       <div ref={ref} className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div style={fs(inView, 0)} className="flex items-start justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
+        {/* AWWWARDS big editorial heading */}
+        <div className="border-t border-black/[0.06] pt-14 mb-10">
+          <div style={fs(inView, 0)} className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+            <h2 className="font-display text-black leading-none tracking-tight" style={{ fontSize: "clamp(48px, 9vw, 120px)" }}>
+              NOMINEES<span style={{ color: "#7B2FE0" }}>.</span>
+            </h2>
+            <div style={fs(inView, 60)} className="flex items-center gap-2 mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-white/30 text-xs uppercase tracking-widest font-medium">
-                Live Nominations
-              </span>
+              <span className="text-black/35 text-sm">{shown.length} live · Vote ends in 18h 42m</span>
             </div>
-            <h2 className="font-display text-4xl text-white">Now accepting votes</h2>
           </div>
-          <button className="flex-shrink-0 mt-2 flex items-center gap-1.5 text-sm text-white/25 hover:text-white/55 transition-colors">
-            View all
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
+          <p style={fs(inView, 80)} className="text-black/40 text-sm mb-10">Projects currently up for community voting.</p>
         </div>
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {shown.map((p, i) => (
-            <div key={p.id} style={fs(inView, 60 + i * 55, "up")}>
-              <GridCard project={p} />
-            </div>
-          ))}
+        {/* 4-column nominees grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {shown.map((p, i) => {
+            const scoreStyle = getScoreStyle(p.score);
+            return (
+              <div key={p.id} style={fs(inView, 60 + i * 55, "up")}>
+                <div className="bg-white rounded-2xl border border-black/[0.07] overflow-hidden cursor-pointer group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                  <div className="relative">
+                    <ProjectPreview gradient={p.gradient} accentColor={p.accentColor} height="h-44" />
+                    {/* Score overlay badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className="font-display text-xs px-2 py-0.5 rounded-lg" style={{ color: scoreStyle.color, background: "rgba(255,255,255,0.95)", border: `1px solid ${scoreStyle.border}` }}>
+                        {p.score.toFixed(1)}
+                      </span>
+                    </div>
+                    {/* Time */}
+                    <div className="absolute top-3 left-3">
+                      <span className="text-white/60 text-[10px] bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full">{p.time}</span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-display text-base text-black leading-tight mb-1 group-hover:text-[#7B2FE0] transition-colors">
+                      {p.title}
+                    </h3>
+                    <p className="text-black/40 text-xs mb-3">{p.creator.name} · {p.creator.role}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1.5 flex-wrap">
+                        {p.tags.slice(0, 2).map((t) => (
+                          <span key={t} className="text-[10px] text-black/35 bg-black/[0.04] border border-black/[0.05] px-2 py-0.5 rounded-full">{t}</span>
+                        ))}
+                      </div>
+                      <span className="text-black/25 text-xs flex-shrink-0">{p.views}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-// ─── RISING SECTION ──────────────────────────────────────────────────────────
+// ─── W.CREATORS SECTION — AWWWARDS creator cards, dark on light ──────────────
+
+function WCreatorsSection() {
+  const [ref, inView] = useInView(0.05);
+
+  return (
+    <section id="creators" className="px-6 pb-20">
+      <div ref={ref} className="max-w-7xl mx-auto">
+        <div className="border-t border-black/[0.06] pt-14 mb-10">
+          <div style={fs(inView, 0)}>
+            <h2 className="font-display text-black leading-none tracking-tight mb-4" style={{ fontSize: "clamp(48px, 9vw, 120px)" }}>
+              W.CREATORS<span style={{ color: "#7B2FE0" }}>.</span>
+            </h2>
+            <p className="text-black/40 text-sm max-w-md">
+              Top-rated creators on Rachnax — ranked by community votes, project quality, and innovation.
+            </p>
+          </div>
+        </div>
+
+        {/* Dark creator cards — AWWWARDS W.CREATORS style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {CREATOR_PROFILES.map((c, i) => {
+            const scoreStyle = getScoreStyle(c.score);
+            return (
+              <div key={i} style={fs(inView, 60 + i * 65, "up")}>
+                <div className="bg-[#0a0a0a] rounded-2xl overflow-hidden cursor-pointer group hover:-translate-y-1 transition-all duration-300" style={{ boxShadow: "none" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 48px rgba(0,0,0,0.18)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+                >
+                  {/* Color strip preview */}
+                  <div className="h-24 w-full relative overflow-hidden" style={{ background: `linear-gradient(${c.gradient})` }}>
+                    <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 30% 40%, ${c.accentColor}30 0%, transparent 60%)` }} />
+                    {/* Rank */}
+                    <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+                      <span className="font-display text-white/60 text-xs">{i + 1}</span>
+                    </div>
+                    {/* Score */}
+                    <div className="absolute top-3 right-3 font-display text-sm px-2.5 py-1 rounded-lg" style={{ color: scoreStyle.color, background: "#0a0a0a", border: `1px solid ${scoreStyle.border}` }}>
+                      {c.score.toFixed(1)}
+                    </div>
+                    {/* Avatar overlapping the strip */}
+                    <div className="absolute -bottom-5 left-5">
+                      <div className="w-12 h-12 rounded-full border-2 border-[#0a0a0a] flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${c.accentColor}cc, ${c.accentColor}50)` }}>
+                        {c.initials.replace("2", "").slice(0, 2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="pt-8 px-5 pb-5">
+                    <h3 className="font-display text-lg text-white mb-0.5 group-hover:text-white">{c.name}</h3>
+                    <p className="text-white/35 text-xs mb-4">{c.role}</p>
+                    <div className="border-t border-white/[0.06] pt-4 flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-white/20 text-[10px] uppercase tracking-widest mb-1">Top Project</p>
+                        <p className="text-white/55 text-xs truncate max-w-[120px]">{c.topProject}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white/20 text-[10px] uppercase tracking-widest mb-1">Projects</p>
+                        <p className="font-display text-2xl text-white">{c.projects}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/20 bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 rounded-full">{c.category}</span>
+                      <button className="text-white/30 hover:text-white text-xs flex items-center gap-1 transition-colors">
+                        View Profile <ArrowUpRight size={11} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── RISING CREATORS — Google Labs colorful cards ────────────────────────────
 
 function RisingSection() {
   const [ref, inView] = useInView(0.08);
@@ -850,218 +667,111 @@ function RisingSection() {
   return (
     <section id="rising" className="px-6 pb-20">
       <div ref={ref} className="max-w-7xl mx-auto">
-        <div style={fs(inView, 0)} className="mb-10">
-          <p className="text-white/25 text-xs uppercase tracking-widest font-medium mb-2">
-            New &amp; Trending
-          </p>
-          <h2 className="font-display text-4xl text-white">Rising Creators</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {RISING.map((p, i) => (
-            <div key={p.id} style={fs(inView, 60 + i * 90, "up")}>
-              <GridCard project={p} />
+        <div className="border-t border-black/[0.06] pt-14 mb-10">
+          <div style={fs(inView, 0)} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <p className="text-black/30 text-xs uppercase tracking-widest font-medium mb-2">New Talent</p>
+              <h2 className="font-display text-black leading-none tracking-tight" style={{ fontSize: "clamp(40px, 7vw, 96px)" }}>
+                RISING<span style={{ color: "#7B2FE0" }}>.</span>
+              </h2>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── LEADERBOARD ─────────────────────────────────────────────────────────────
-
-function LeaderboardSection() {
-  const [ref, inView] = useInView(0.06);
-  const medals = ["🥇", "🥈", "🥉"];
-
-  return (
-    <section id="leaderboard" className="px-6 pb-24">
-      <div ref={ref} className="max-w-7xl mx-auto">
-        {/* Section label */}
-        <div style={fs(inView, 0)} className="text-center mb-16">
-          <p className="text-white/25 text-xs uppercase tracking-widest font-medium mb-3">
-            All Time
-          </p>
-          <h2 className="font-display text-5xl text-white">Top Creators</h2>
+            <p style={fs(inView, 80)} className="text-black/35 text-sm max-w-xs text-right hidden md:block mb-2">
+              New creators making their mark. Fresh work, raw talent.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Leaderboard list — 3 cols */}
-          <div className="lg:col-span-3 space-y-3">
-            {LEADERBOARD.map((creator, i) => {
-              const scoreStyle = getScoreStyle(creator.score);
-              return (
+        {/* Google Labs style — colorful cards with white text */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {RISING_CREATORS.map((c, i) => {
+            const scoreStyle = getScoreStyle(c.score);
+            return (
+              <div
+                key={i}
+                style={fs(inView, 60 + i * 80, "up")}
+              >
                 <div
-                  key={i}
-                  style={fs(inView, 80 + i * 70, "left")}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.11] hover:bg-white/[0.04] transition-all duration-300 group cursor-pointer"
+                  className="rounded-2xl p-6 cursor-pointer group overflow-hidden relative min-h-[220px] flex flex-col justify-between hover:-translate-y-1 transition-all duration-300"
+                  style={{ background: `linear-gradient(${c.gradient})` }}
                 >
-                  {/* Rank */}
-                  <div className="w-8 text-center flex-shrink-0">
-                    {i < 3 ? (
-                      <span className="text-xl">{medals[i]}</span>
-                    ) : (
-                      <span className="font-display text-lg text-white/20">{i + 1}</span>
-                    )}
+                  <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 20% 20%, ${c.accentColor}25 0%, transparent 60%)` }} />
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-10">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white border-2 border-white/20" style={{ background: `${c.accentColor}40` }}>
+                        {c.initials.replace("2", "").slice(0, 2)}
+                      </div>
+                      <span className="text-sm font-display px-2.5 py-1 rounded-lg bg-black/25 border border-white/10" style={{ color: scoreStyle.color }}>
+                        {c.score.toFixed(1)}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-xl text-white leading-tight mb-1">{c.name}</h3>
+                    <p className="text-white/50 text-xs mb-2">{c.role}</p>
+                    <p className="text-white/30 text-xs">{c.topProject}</p>
                   </div>
-
-                  {/* Avatar */}
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                    style={{
-                      background: `linear-gradient(135deg, ${creator.accentColor}70, ${creator.accentColor}28)`,
-                      border: `1px solid ${creator.accentColor}28`,
-                    }}
-                  >
-                    {creator.initials}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate group-hover:text-white transition-colors">
-                      {creator.name}
-                    </p>
-                    <p className="text-white/30 text-xs truncate">
-                      {creator.role} · {creator.projects} projects
-                    </p>
-                  </div>
-
-                  {/* Score */}
-                  <div
-                    className="flex-shrink-0 text-center px-3 py-1.5 rounded-xl"
-                    style={{
-                      color: scoreStyle.color,
-                      background: scoreStyle.bg,
-                      border: `1px solid ${scoreStyle.border}`,
-                    }}
-                  >
-                    <p className="font-display text-lg leading-none">{creator.score.toFixed(1)}</p>
-                    <p className="text-[9px] opacity-55 mt-0.5">/10</p>
+                  <div className="relative flex items-center justify-between mt-4 pt-4 border-t border-white/[0.1]">
+                    <span className="text-white/30 text-xs">{c.projects} projects</span>
+                    <span className="text-white/25 text-xs bg-white/10 px-2 py-0.5 rounded-full">{c.category}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Rating guide — 2 cols */}
-          <div style={fs(inView, 200, "right")} className="lg:col-span-2 flex flex-col gap-5">
-            <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] flex-1">
-              <p className="text-white/25 text-xs uppercase tracking-widest font-medium mb-1">
-                How it works
-              </p>
-              <h3 className="font-display text-2xl text-white mb-4">The Rating System</h3>
-              <p className="text-white/30 text-sm leading-relaxed mb-6">
-                Projects are scored across four dimensions by the Rachnax community in real-time.
-              </p>
-
-              <div className="space-y-3">
-                {[
-                  { range: "9.5–10", label: "Exceptional", desc: "Sets a new standard", color: "#10B981" },
-                  { range: "9.0–9.4", label: "Excellent", desc: "Top-tier execution", color: "#22C55E" },
-                  { range: "8.5–8.9", label: "Great", desc: "Strong creative direction", color: "#EAB308" },
-                  { range: "8.0–8.4", label: "Good", desc: "Solid fundamentals", color: "#F59E0B" },
-                ].map((tier, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.025] border border-white/[0.05]"
-                  >
-                    <div
-                      className="text-xs font-display px-2.5 py-1 rounded-lg w-[72px] text-center flex-shrink-0"
-                      style={{
-                        color: tier.color,
-                        background: `${tier.color}12`,
-                        border: `1px solid ${tier.color}22`,
-                      }}
-                    >
-                      {tier.range}
-                    </div>
-                    <div>
-                      <p className="text-white/60 text-sm font-medium">{tier.label}</p>
-                      <p className="text-white/25 text-xs">{tier.desc}</p>
-                    </div>
-                  </div>
-                ))}
               </div>
-            </div>
-
-            {/* Dimensions */}
-            <div className="p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-              <p className="text-white/25 text-xs uppercase tracking-widest mb-3">
-                Scored on
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: "Design", icon: "✦" },
-                  { label: "Usability", icon: "◈" },
-                  { label: "Creativity", icon: "◉" },
-                  { label: "Content", icon: "◎" },
-                ].map((d) => (
-                  <div
-                    key={d.label}
-                    className="flex items-center gap-2 text-white/35 text-sm py-1.5"
-                  >
-                    <span className="text-white/20 text-xs">{d.icon}</span>
-                    {d.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-// ─── CTA SECTION ─────────────────────────────────────────────────────────────
+// ─── SUBMIT CTA — AWWWARDS two-card bottom ───────────────────────────────────
 
-function CTASection() {
-  const [ref, inView] = useInView(0.15);
+function SubmitCTA() {
+  const [ref, inView] = useInView(0.1);
 
   return (
     <section className="px-6 pb-20">
-      <div className="max-w-7xl mx-auto">
-        <div
-          ref={ref}
-          style={{
-            ...fs(inView, 0, "up"),
-            background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 45%, #3730A3 100%)",
-          }}
-          className="rounded-3xl p-12 md:p-20 text-center relative overflow-hidden"
-        >
-          {/* Background glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(56,189,248,0.12)_0%,transparent_55%)]" />
-
-          <div className="relative">
-            <p className="text-white/40 text-xs uppercase tracking-widest font-medium mb-5">
-              Be Part of It
-            </p>
-            <h2 className="font-display text-5xl md:text-6xl text-white leading-tight mb-5">
-              Ready to get your
-              <br />
-              <span className="italic opacity-75">work recognized?</span>
+      <div ref={ref} className="max-w-7xl mx-auto">
+        <div className="border-t border-black/[0.06] pt-14 mb-8">
+          <div style={fs(inView, 0)}>
+            <h2 className="font-display text-black leading-none tracking-tight mb-6" style={{ fontSize: "clamp(40px, 7vw, 100px)" }}>
+              YOUR TURN<span style={{ color: "#7B2FE0" }}>.</span>
             </h2>
-            <p className="text-white/45 max-w-md mx-auto mb-10 leading-relaxed">
-              Join Rachnax and start showcasing your projects to thousands of
-              creators, employers, and clients.
-            </p>
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Link
-                href="/#contact"
-                className="inline-flex items-center gap-2 bg-white text-black px-7 py-3.5 rounded-full text-sm font-medium hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                Join the Waitlist
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+          </div>
+        </div>
+
+        {/* Two-card CTA — AWWWARDS bottom style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Card 1 — Dark "Submit" */}
+          <div style={fs(inView, 80, "left")}>
+            <div className="bg-[#0a0a0a] rounded-3xl p-10 flex flex-col justify-between min-h-[280px] group cursor-pointer hover:-translate-y-1 transition-all duration-300">
+              <div>
+                <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center mb-8">
+                  <ArrowUpRight color="white" size={18} />
+                </div>
+                <h3 className="font-display text-3xl text-white mb-3">Submit your work<br />for recognition.</h3>
+                <p className="text-white/35 text-sm leading-relaxed max-w-xs">Every project you&apos;ve built deserves to be seen. Upload your work and let the community judge.</p>
+              </div>
+              <Link href="/#contact" className="mt-6 inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full text-sm font-medium hover:bg-white/90 w-fit hover:scale-[1.02] transition-all">
+                Submit Your Work <ArrowRight />
               </Link>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 border border-white/25 text-white px-7 py-3.5 rounded-full text-sm font-medium hover:border-white/50 hover:bg-white/[0.06] transition-all"
-              >
-                Learn More
+            </div>
+          </div>
+
+          {/* Card 2 — Purple "Early Access" */}
+          <div style={fs(inView, 160, "right")}>
+            <div
+              className="rounded-3xl p-10 flex flex-col justify-between min-h-[280px] group cursor-pointer hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 50%, #3730A3 100%)" }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_35%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center mb-8">
+                  <span className="text-white text-lg">✦</span>
+                </div>
+                <h3 className="font-display text-3xl text-white mb-3">Get early access<br />to all features.</h3>
+                <p className="text-white/50 text-sm leading-relaxed max-w-xs">Join the Rachnax waitlist and be among the first 10,000 creators on the platform.</p>
+              </div>
+              <Link href="/#contact" className="relative mt-6 inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full text-sm font-medium hover:bg-white/90 w-fit hover:scale-[1.02] transition-all">
+                Join the Waitlist <ArrowRight />
               </Link>
             </div>
           </div>
@@ -1075,25 +785,12 @@ function CTASection() {
 
 function ExploreFooter() {
   return (
-    <footer className="border-t border-white/[0.05] px-6 py-8">
+    <footer className="border-t border-black/[0.06] px-6 py-8">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="font-display text-white/30 hover:text-white/60 transition-colors"
-        >
-          Rachnax
-        </Link>
-        <p className="text-white/15 text-xs text-center">
-          © {new Date().getFullYear()} Rachnax · Showcasing the world&apos;s best creative work
-        </p>
-        <Link
-          href="/#contact"
-          className="text-white/25 hover:text-white/55 text-sm transition-colors flex items-center gap-1"
-        >
-          Join Waitlist
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
+        <Link href="/" className="font-display text-black/35 hover:text-black/70 transition-colors">Rachnax</Link>
+        <p className="text-black/20 text-xs text-center">© {new Date().getFullYear()} Rachnax · Discover the world&apos;s best creative work</p>
+        <Link href="/#contact" className="text-black/30 hover:text-black/60 text-sm transition-colors flex items-center gap-1">
+          Join Waitlist <ArrowRight size={12} />
         </Link>
       </div>
     </footer>
@@ -1106,17 +803,15 @@ export default function ExplorePage() {
   const [category, setCategory] = useState("All");
 
   return (
-    <div className="min-h-screen" style={{ background: "#09090f", color: "#ffffff" }}>
+    <div className="min-h-screen" style={{ background: "#fffefe", color: "#0a0a0a" }}>
       <ExploreNav />
       <PageHero />
       <CategoryTabs active={category} setActive={setCategory} />
-      <div className="pt-8">
-        <FeaturedSection category={category} />
-        <NominationsSection category={category} />
-        <RisingSection />
-        <LeaderboardSection />
-        <CTASection />
-      </div>
+      <COTDSection />
+      <NomineesSection category={category} />
+      <WCreatorsSection />
+      <RisingSection />
+      <SubmitCTA />
       <ExploreFooter />
     </div>
   );
