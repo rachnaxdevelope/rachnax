@@ -375,10 +375,10 @@ function Navbar() {
           {/* CTA */}
           <div className="flex items-center gap-3">
             <Link
-              href="#contact"
+              href="/explore"
               className="hidden md:flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-black/85 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              Join Waitlist
+              Explore Creators
               <Icon.ArrowUpRight />
             </Link>
             <button

@@ -175,6 +175,27 @@ button {
   caret-color: #ffffff;
 }
 
+/* ── Underline slide animation ───────────────────────────────── */
+
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
 /* ── Reduced motion ──────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
