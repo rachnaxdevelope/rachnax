@@ -490,17 +490,17 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
               style={{ animationDelay: "410ms" }}
             >
               <Link
-                href="#contact"
+                href="/explore"
                 className="inline-flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-sm font-medium hover:bg-black/85 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
               >
-                Join Waitlist
+                Explore Creators
                 <Icon.ArrowRight />
               </Link>
               <Link
-                href="#how-it-works"
+                href="#contact"
                 className="inline-flex items-center gap-2 border border-black/15 text-black px-5 py-3 rounded-full text-sm font-medium hover:border-black/30 hover:bg-black/5 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
               >
-                How It Works
+                Submit Your Work
               </Link>
             </div>
           </div>
