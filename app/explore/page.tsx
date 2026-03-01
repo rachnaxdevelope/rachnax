@@ -29,7 +29,6 @@ function fs(inView: boolean, delay = 0, dir: "up" | "left" | "right" | "none" = 
       : dir === "right" ? "translate3d(20px,0,0)"
       : "translate3d(0,20px,0)",
     transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-    willChange: "opacity, transform",
   };
 }
 
@@ -401,12 +400,8 @@ function COTDSection() {
                   </div>
                 </div>
               </div>
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-center justify-center">
-                <button className="opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 bg-white text-black px-6 py-2.5 rounded-full text-sm font-medium">
-                  Preview Project ↗
-                </button>
-              </div>
+              {/* Subtle hover glow — no button */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-[background-color] duration-500 rounded-2xl pointer-events-none" />
             </div>
           </div>
 
@@ -516,81 +511,104 @@ function NomineesSection({ category }: { category: string }) {
           </div>
         </div>
 
-        {/* 3 cards in 1 row — AWWWARDS style interactive cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* 3 cards — AWWWARDS flat, image-first, no border */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {shown.map((p, i) => {
             const scoreStyle = getScoreStyle(p.score);
             return (
-              <div key={p.id} style={fs(inView, 60 + i * 80, "up")}>
-                <div className="bg-white rounded-2xl border border-black/[0.07] overflow-hidden cursor-pointer group transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-2xl hover:-translate-y-1.5 hover:border-black/[0.12]">
+              <div key={p.id} style={fs(inView, 60 + i * 80, "up")} className="group cursor-pointer">
 
-                  {/* Image — zooms on hover, overlay appears */}
-                  <div className="relative overflow-hidden" style={{ height: "clamp(200px, 22vw, 300px)" }}>
-                    <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.05]">
-                      <ProjectPreview gradient={p.gradient} accentColor={p.accentColor} height="h-full" />
+                {/* ── Image block ──────────────────────────── */}
+                <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "4/3" }}>
+
+                  {/* Preview — zooms on hover */}
+                  <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]">
+                    <ProjectPreview gradient={p.gradient} accentColor={p.accentColor} height="h-full" />
+                  </div>
+
+                  {/* Permanent bottom gradient for legibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                  {/* Rank badge — top left */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-white/70 bg-black/35 backdrop-blur-sm px-3 py-1 rounded-full">
+                      NO.{String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  {/* Score — top right */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <span
+                      className="font-display text-sm px-2.5 py-1 rounded-xl font-semibold shadow-lg"
+                      style={{ color: scoreStyle.color, background: "rgba(255,255,255,0.97)", border: `1px solid ${scoreStyle.border}` }}
+                    >
+                      {p.score.toFixed(1)}
+                    </span>
+                  </div>
+
+                  {/* Hover overlay — slides up from bottom */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-[background-color] duration-400 z-10" />
+
+                  {/* Hover content — score breakdown + button */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] p-5">
+                    {/* Mini score dots row */}
+                    <div className="flex items-center gap-4 mb-4">
+                      {Object.entries(p.breakdown).map(([key, val]) => (
+                        <div key={key} className="text-center">
+                          <p className="text-white/45 text-[9px] uppercase tracking-wider mb-1">{key.slice(0, 3)}</p>
+                          <p className="font-display text-white text-lg leading-none">{val}</p>
+                        </div>
+                      ))}
                     </div>
+                    {/* CTA */}
+                    <button className="w-full flex items-center justify-center gap-2 bg-white text-black py-2.5 rounded-xl text-sm font-medium hover:bg-white/90 transition-[background-color] duration-200">
+                      View Project
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 17L17 7M7 7h10v10" /></svg>
+                    </button>
+                  </div>
 
-                    {/* Dark hover overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/65 transition-all duration-400 flex flex-col items-center justify-center gap-4">
-                      {/* Score breakdown card — reveals on hover */}
-                      <div className="opacity-0 group-hover:opacity-100 translate-y-5 group-hover:translate-y-0 transition-all duration-400 delay-75 bg-white rounded-2xl p-4 w-52">
-                        <p className="text-black/40 text-xs uppercase tracking-widest mb-3 font-medium">Score Breakdown</p>
-                        {Object.entries(p.breakdown).map(([key, val]) => (
-                          <div key={key} className="flex items-center justify-between py-1 border-b border-black/[0.06] last:border-0">
-                            <span className="text-black/55 text-xs capitalize">{key}</span>
-                            <div className="flex items-center gap-2">
-                              <div className="w-12 h-1 rounded-full bg-black/[0.07]">
-                                <div className="h-full rounded-full" style={{ width: `${(val / 5) * 100}%`, background: p.accentColor }} />
-                              </div>
-                              <span className="font-display text-sm text-black">{val}</span>
-                            </div>
-                          </div>
-                        ))}
+                  {/* Accent bottom bar — always visible */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[3px] z-30 opacity-0 group-hover:opacity-100 transition-[opacity] duration-300"
+                    style={{ background: p.accentColor }}
+                  />
+                </div>
+
+                {/* ── Info below image ─────────────────────── */}
+                <div className="pt-4">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3
+                      className="font-display text-xl text-black leading-tight group-hover:text-[#7B2FE0] transition-[color] duration-300"
+                    >
+                      {p.title}
+                    </h3>
+                    <span className="text-[10px] text-black/40 bg-black/[0.05] border border-black/[0.07] px-2.5 py-1 rounded-full flex-shrink-0 mt-0.5">
+                      {p.category}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                        style={{ background: `linear-gradient(135deg, ${p.accentColor}cc, ${p.accentColor}55)` }}
+                      >
+                        {p.creator.initials[0]}
                       </div>
-                      {/* View button */}
-                      <button className="opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-400 delay-100 flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full text-sm font-medium hover:scale-[1.03] transition-transform">
-                        View Project
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 17L17 7M7 7h10v10" /></svg>
-                      </button>
+                      <span className="text-black/50 text-sm">{p.creator.name}</span>
                     </div>
-
-                    {/* Score badge — always visible */}
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="font-display text-sm px-2.5 py-1 rounded-xl shadow-md" style={{ color: scoreStyle.color, background: "rgba(255,255,255,0.96)", border: `1px solid ${scoreStyle.border}` }}>
-                        {p.score.toFixed(1)}
-                      </span>
-                    </div>
-
-                    {/* Nominee tag */}
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className="text-white/80 text-[10px] tracking-widest uppercase bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">Nominee</span>
-                    </div>
-
-                    {/* Time */}
-                    <div className="absolute bottom-4 left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-white/60 text-xs">{p.time}</span>
+                    <div className="flex items-center gap-3 text-black/30 text-xs">
+                      <span>{p.views} views</span>
+                      <span className="text-black/15">·</span>
+                      <span>{p.time}</span>
                     </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="p-5">
-                    <h3 className="font-display text-xl text-black mb-1.5 group-hover:text-[#7B2FE0] transition-colors duration-300">{p.title}</h3>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ background: `linear-gradient(135deg, ${p.accentColor}cc, ${p.accentColor}60)` }}>
-                        {p.creator.initials[0]}
-                      </div>
-                      <span className="text-black/55 text-sm">{p.creator.name}</span>
-                      <span className="text-black/20">·</span>
-                      <span className="text-black/40 text-sm">{p.creator.role}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1.5 flex-wrap">
-                        {p.tags.slice(0, 2).map((t) => (
-                          <span key={t} className="text-[10px] text-black/40 bg-black/[0.04] border border-black/[0.06] px-2 py-0.5 rounded-full">{t}</span>
-                        ))}
-                      </div>
-                      <span className="text-black/35 text-xs">{p.views}</span>
-                    </div>
+                  {/* Tags row */}
+                  <div className="flex gap-1.5 mt-3">
+                    {p.tags.slice(0, 3).map((t) => (
+                      <span key={t} className="text-[10px] text-black/35 bg-black/[0.04] px-2 py-0.5 rounded-full border border-black/[0.05]">{t}</span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -793,10 +811,10 @@ function SubmitCTA() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
           {/* Dark — Submit */}
-          <div style={fs(inView, 80, "left")}>
-            <div className="bg-[#0c0c0f] rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+          <div style={fs(inView, 80, "left")} className="flex flex-col">
+            <div className="bg-[#0c0c0f] rounded-3xl p-10 flex flex-col justify-between flex-1 group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               <div>
                 <div className="w-10 h-10 rounded-full border border-white/[0.12] flex items-center justify-center mb-8">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round"><path d="M7 17L17 7M7 7h10v10" /></svg>
@@ -812,8 +830,8 @@ function SubmitCTA() {
           </div>
 
           {/* Purple — Early Access */}
-          <div style={fs(inView, 160, "right")}>
-            <div className="rounded-3xl p-10 flex flex-col justify-between min-h-[300px] group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden" style={{ background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 50%, #3730A3 100%)" }}>
+          <div style={fs(inView, 160, "right")} className="flex flex-col">
+            <div className="rounded-3xl p-10 flex flex-col justify-between flex-1 group cursor-pointer hover:-translate-y-1.5 hover:shadow-2xl transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden" style={{ background: "linear-gradient(135deg, #7B2FE0 0%, #5B21B6 50%, #3730A3 100%)" }}>
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_35%,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center mb-8">

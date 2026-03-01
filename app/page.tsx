@@ -47,7 +47,6 @@ function fs(
       ? "translate3d(0,20px,0)"
       : "translate3d(0,0,0)",
     transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-    willChange: "opacity, transform",
   };
 }
 
@@ -341,7 +340,7 @@ function Navbar() {
           scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.07)]" : ""
         }`}
       >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-8 h-8 relative">
@@ -425,7 +424,7 @@ function Hero({ waitlistCount }: { waitlistCount: number }) {
 
   return (
     <section className="min-h-screen flex flex-col justify-center pt-16 px-6">
-      <div className="max-w-6xl mx-auto w-full">
+      <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center py-12 md:py-16">
           {/* Left — Copy */}
           <div>
@@ -664,7 +663,7 @@ function Problem() {
 
   return (
     <section className="py-14 md:py-20 px-6 bg-black">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div ref={textRef} style={fs(textInView, 0, "left")}>
             <p className="text-white/30 text-xs tracking-widest uppercase font-medium mb-5">
@@ -734,7 +733,7 @@ function About() {
 
   return (
     <section id="about" className="py-14 md:py-20 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div ref={textRef} style={fs(textInView, 0, "left")}>
             <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
@@ -875,7 +874,7 @@ function HowItWorks() {
       id="how-it-works"
       className="py-14 md:py-20 px-6 bg-black/[0.02] border-y border-black/6"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div ref={titleRef} className="text-center mb-16" style={fs(titleInView, 0, "up")}>
           <p className="text-black/35 text-xs tracking-widest uppercase font-medium mb-5">
             How It Works
@@ -968,7 +967,7 @@ function Services() {
 
   return (
     <section id="services" className="py-14 md:py-20 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div
           ref={titleRef}
           className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14"
@@ -1127,7 +1126,7 @@ function Contact() {
 
   return (
     <section id="contact" className="py-14 md:py-20 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left */}
           <div ref={leftRef} className="lg:pt-4" style={fs(leftInView, 0, "left")}>
@@ -1370,7 +1369,7 @@ function Footer() {
 
   return (
     <footer ref={ref} style={fs(inView, 0, "up")} className="border-t border-black/8 px-6 py-10">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 relative">
             <Image
