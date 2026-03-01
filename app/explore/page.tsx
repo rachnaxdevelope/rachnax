@@ -643,7 +643,7 @@ function SpotlightSection() {
                   <div className="w-0.5 h-14 rounded-full flex-shrink-0 transition-all duration-300 group-hover:h-16" style={{ background: c.accentColor }} />
 
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ring-0 group-hover:ring-2 ring-offset-2 transition-all duration-300" style={{ background: `linear-gradient(135deg, ${c.accentColor}cc, ${c.accentColor}50)`, ringColor: c.accentColor }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ring-0 group-hover:ring-2 ring-offset-2 transition-all duration-300" style={{ background: `linear-gradient(135deg, ${c.accentColor}cc, ${c.accentColor}50)` }}>
                     {c.initials.slice(0, 2)}
                   </div>
 
